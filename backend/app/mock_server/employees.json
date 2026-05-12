@@ -1,0 +1,25 @@
+[
+    {
+        "employee_id": "EMP001",
+        "employee_name": "Rahul",
+        "employee_location": "Chennai",
+        "department": "Engineering",
+        "designation": "Solutions Architect"
+    },
+
+    {
+        "employee_id": "EMP002",
+        "employee_name": "Anjali",
+        "employee_location": "Mumbai",
+        "department": "Finance",
+        "designation": "Finance Manager"
+    },
+
+    {
+        "employee_id": "EMP003",
+        "employee_name": "Vikram",
+        "employee_location": "Hyderabad",
+        "department": "Sales",
+        "designation": "Regional Sales Lead"
+    }
+]

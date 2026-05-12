@@ -1,0 +1,52 @@
+[
+    {
+        "hotel_id": "HT001",
+        "hotel_name": "Taj Business Hotel",
+        "city": "Bangalore",
+        "hotel_type": "business",
+        "location_area": "MG Road",
+        "price_per_night": 8500,
+        "rating": 4.7
+    },
+
+    {
+        "hotel_id": "HT002",
+        "hotel_name": "Budget Inn",
+        "city": "Bangalore",
+        "hotel_type": "budget",
+        "location_area": "Electronic City",
+        "price_per_night": 3500,
+        "rating": 3.9
+    },
+
+    {
+        "hotel_id": "HT003",
+        "hotel_name": "Elite Suites",
+        "city": "Bangalore",
+        "hotel_type": "business",
+        "location_area": "Whitefield",
+        "price_per_night": 7200,
+        "rating": 4.5
+    },
+
+    {
+        "hotel_id": "HT004",
+        "hotel_name": "Luxury Residency",
+        "city": "Mumbai",
+        "hotel_type": "luxury",
+        "location_area": "BKC",
+        "price_per_night": 12000,
+        "rating": 4.8
+    },
+
+
+    {
+    "hotel_id": "HT004",
+    "hotel_name": "Budget Inn",
+    "city": "Bangalore",
+    "hotel_type": "business",
+    "location_area": "Electronic City",
+    "price_per_night": 5500,
+    "rating": 4.2
+}
+]
