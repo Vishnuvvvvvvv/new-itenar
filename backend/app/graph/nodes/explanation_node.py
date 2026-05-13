@@ -7,98 +7,147 @@ def explanation_node(
     state: TravelState
 ):
 
-    itinerary = state[
-        "optimized_itinerary"
-    ]
-
-    policy_results = state[
-        "policy_results"
-    ]
-
-    compliant = policy_results.get(
-        "compliant",
-        True
+    optimized = state.get(
+        "optimized_itinerary",
+        {}
     )
 
-    response = "\n"
-
-    response += (
-        "Optimized itinerary generated.\n\n"
+    policy_results = state.get(
+        "policy_results",
+        {}
     )
 
-    # =========================
-    # FLIGHT
-    # =========================
-
-    response += (
-        "Selected Flight:\n"
+    transport = state.get(
+        "transport_recommendation",
+        {}
     )
 
-    response += (
-        f"{itinerary['selected_flight'].get('airline', 'N/A')}"
-        "\n\n"
+    approval = state.get(
+        "approval_workflow",
+        {}
     )
 
-    # =========================
-    # HOTEL
-    # =========================
-
-    response += (
-        "Selected Hotel:\n"
+    calendar_analysis = state.get(
+        "calendar_analysis",
+        []
     )
 
-    response += (
-        f"{itinerary['selected_hotel'].get('hotel_name', 'N/A')}"
-        "\n\n"
+    selected_flights = optimized.get(
+        "selected_flights",
+        []
     )
 
-    # =========================
-    # COST
-    # =========================
-
-    response += (
-        "Total Cost:\n"
+    selected_hotels = optimized.get(
+        "selected_hotels",
+        []
     )
 
-    response += (
-        f"₹{itinerary.get('total_trip_cost', 0)}"
-        "\n\n"
+    response = (
+        "\nOptimized itinerary generated.\n"
     )
 
-    # =========================
-    # OPTIMIZATION REASON
-    # =========================
+    response += "\n\nSELECTED FLIGHTS:\n"
 
-    response += (
-        "Optimization Reason:\n"
-    )
+    for flight in selected_flights:
 
-    response += (
-        f"{itinerary.get('optimization_reason', '')}"
-        "\n\n"
-    )
+        response += f"""
 
-    # =========================
-    # COMPLIANCE
-    # =========================
+{flight.get('airline')}
+Route: {flight.get('source')} → {flight.get('destination')}
+Departure: {flight.get('departure_time')}
+Arrival: {flight.get('arrival_time')}
+Price: ₹{flight.get('price')}
+"""
 
-    if compliant:
+    response += "\nSELECTED HOTELS:\n"
+
+    for hotel in selected_hotels:
+
+        response += f"""
+
+{hotel.get('hotel_name')}
+City: {hotel.get('city')}
+Location: {hotel.get('location_area')}
+Rating: {hotel.get('rating')}
+Price/Night: ₹{hotel.get('price_per_night')}
+"""
+
+    response += f"""
+
+TOTAL COST:
+₹{optimized.get('total_trip_cost', 0)}
+
+OPTIMIZATION REASON:
+{optimized.get('optimization_reason', '')}
+"""
+
+    if policy_results.get(
+        "compliant"
+    ):
 
         response += (
-            "Trip is policy compliant.\n"
+            "\n\nTrip is policy compliant.\n"
         )
 
     else:
 
         response += (
-            "Policy violations detected.\n"
+            "\n\nPolicy violations detected.\n"
         )
 
-    state["final_response"] = (
-        response
-    )
+    if transport:
 
-    state["execution_logs"].append(
+        response += f"""
+
+LOCAL TRANSPORT:
+
+Transport Type:
+{transport.get('selected_transport_type')}
+
+Reason:
+{transport.get('reason')}
+"""
+
+    if approval:
+
+        response += f"""
+
+APPROVAL WORKFLOW:
+
+Approval Required:
+{approval.get('approval_required')}
+
+Approval Level:
+{approval.get('approval_level')}
+
+Reason:
+{approval.get('reason')}
+"""
+
+    if calendar_analysis:
+
+        response += (
+            "\n\nSCHEDULE ANALYSIS:\n"
+        )
+
+        for item in calendar_analysis:
+
+            response += f"""
+
+City: {item.get('city')}
+Meeting: {item.get('meeting_title')}
+Arrival: {item.get('arrival_time')}
+Meeting Time: {item.get('meeting_time')}
+Buffer: {item.get('buffer_minutes')} minutes
+"""
+
+    state[
+        "final_response"
+    ] = response
+
+    state[
+        "execution_logs"
+    ].append(
         "Explanation node executed."
     )
 

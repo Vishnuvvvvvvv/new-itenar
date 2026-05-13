@@ -3,19 +3,37 @@ from app.utils.json_loader import (
 )
 
 
-FLIGHT_FILE = "app/mock_server/flights.json"
+FLIGHT_FILE = (
+    "app/mock_server/flights.json"
+)
 
 
-def get_flights(
-
+def search_flights(
     source,
-
-    destination
+    destinations
 ):
 
     flights = load_json_file(
         FLIGHT_FILE
     )
+
+    # SUPPORT SINGLE DESTINATION
+
+    if isinstance(
+        destinations,
+        str
+    ):
+
+        destinations = [
+            destinations
+        ]
+
+    normalized_destinations = [
+
+        destination.lower()
+
+        for destination in destinations
+    ]
 
     matching_flights = []
 
@@ -23,7 +41,10 @@ def get_flights(
 
         if (
 
-            flight.get("source", "").lower()
+            flight.get(
+                "source",
+                ""
+            ).lower()
 
             == source.lower()
 
@@ -34,7 +55,7 @@ def get_flights(
                 ""
             ).lower()
 
-            == destination.lower()
+            in normalized_destinations
         ):
 
             matching_flights.append(

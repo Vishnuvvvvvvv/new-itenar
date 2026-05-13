@@ -1,91 +1,45 @@
-from typing import TypedDict
-from typing import List
-from typing import Dict
-from typing import Any
+from typing import (
+    TypedDict,
+    List,
+    Dict,
+    Any
+)
 
 
-class TravelState(TypedDict):
-
-    # =========================
-    # USER INPUT
-    # =========================
+class TravelState(
+    TypedDict
+):
 
     user_input: str
 
     employee_id: str
 
-
-    # =========================
-    # EMPLOYEE CONTEXT
-    # =========================
-
-    employee_context: Dict[str, Any]
-
-
-    # =========================
-    # PARSED REQUEST
-    # =========================
-
     parsed_request: Dict[str, Any]
-
-
-    # =========================
-    # WORKFLOW EXECUTION
-    # =========================
-
-    next_steps: List[str]
-
-    current_step: str
 
     request_type: str
 
+    next_steps: List[str]
 
-    # =========================
-    # CALENDAR DATA
-    # =========================
+    employee_context: Dict[str, Any]
 
-    calendar_events: List[Dict]
+    calendar_events: List[Dict[str, Any]]
 
-    calendar_conflicts: List[Dict]
+    calendar_conflicts: List[Dict[str, Any]]
 
+    schedule_analysis: List[Dict[str, Any]]
 
-    # =========================
-    # FLIGHT DATA
-    # =========================
+    flight_options: List[Dict[str, Any]]
 
-    flight_options: List[Dict]
+    hotel_options: List[Dict[str, Any]]
 
-
-    # =========================
-    # HOTEL DATA
-    # =========================
-
-    hotel_options: List[Dict]
-
-
-    # =========================
-    # POLICY VALIDATION
-    # =========================
-
-    policy_results: Dict[str, Any]
-
-
-    # =========================
-    # FINAL ITINERARY
-    # =========================
+    transport_options: List[Dict[str, Any]]
 
     optimized_itinerary: Dict[str, Any]
 
+    policy_results: Dict[str, Any]
 
-    # =========================
-    # FINAL RESPONSE
-    # =========================
+    approval_workflow: Dict[str, Any]
 
     final_response: str
-
-
-    # =========================
-    # EXECUTION LOGS
-    # =========================
 
     execution_logs: List[str]

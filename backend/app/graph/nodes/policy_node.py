@@ -1,4 +1,6 @@
-from app.graph.state import TravelState
+from app.graph.state import (
+    TravelState
+)
 
 from app.agents.policy_agent import (
     policy_agent
@@ -19,42 +21,59 @@ def policy_node(
         []
     )
 
-    # =========================
-    # SAFE ACCESS
-    # =========================
-
-    selected_flight = (
-
-        flights[0]
-
-        if isinstance(flights, list)
-        and len(flights) > 0
-
-        else {}
+    employee_context = state.get(
+        "employee_context",
+        {}
     )
 
-    selected_hotel = (
+    # =========================
+    # CALCULATE TOTAL COST
+    # =========================
 
-        hotels[0]
+    total_cost = (
 
-        if isinstance(hotels, list)
-        and len(hotels) > 0
+        sum(
 
-        else {}
+            flight.get(
+                "price",
+                0
+            )
+
+            for flight in flights
+        )
+
+        +
+
+        sum(
+
+            hotel.get(
+                "price_per_night",
+                0
+            )
+
+            for hotel in hotels
+        )
     )
 
-    policy_result = policy_agent(
+    # =========================
+    # POLICY AGENT
+    # =========================
 
-        selected_flight,
+    results = policy_agent(
 
-        selected_hotel
+        flights,
+        hotels,
+        employee_context,
+        total_cost
     )
 
     state["policy_results"] = (
-        policy_result
+        results
     )
 
-    state["execution_logs"].append(
+    state[
+        "execution_logs"
+    ].append(
         "Policy RAG agent executed successfully."
     )
 

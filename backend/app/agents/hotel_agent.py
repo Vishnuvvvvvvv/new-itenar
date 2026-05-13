@@ -1,125 +1,122 @@
 import json
-import re
 
-from app.core.llm import llm
+from app.core.llm import (
+    llm
+)
 
-from app.mcp_tools.hotel_tool import (
+from app.db.hotel_db import (
     search_hotels
 )
-HOTEL_AGENT_PROMPT = """
-You are an enterprise AI hotel recommendation agent.
 
-Analyze:
-- user preferences
-- hotel options
-
-Recommend the BEST hotels.
-
-IMPORTANT:
-- Return ONLY valid JSON
-- Do NOT explain anything
-- Do NOT generate Python code
-- Do NOT generate markdown
-- Do NOT generate headings
-- Output MUST start with {{
-- Output MUST end with }}
-
-Required format:
-
-{{
-    "recommended_hotels": [
-        {{
-            "hotel_id": "",
-            "reason": ""
-        }}
-    ]
-}}
-
-User Preferences:
-{preferences}
-
-Available Hotels:
-{hotels}
-"""
-
-
-def hotel_agent(parsed_request):
-
-    destination = parsed_request.get(
-        "destination"
-    )
-
-    preferences = parsed_request.get(
-        "preferences",
-        []
-    )
-
-    hotels = search_hotels(
-        destination
-    )
-
-    prompt = HOTEL_AGENT_PROMPT.format(
-        preferences=preferences,
-        hotels=hotels
-    )
-
-    response = llm.invoke(prompt)
-
-    content = response.content
-
-    print("\nHOTEL AGENT RAW OUTPUT:\n")
-    print(content)
-
-    try:
-
-        json_match = re.search(
-    r'```json\s*(\{[\s\S]*?\})\s*```',
-    content
+from app.utils.json_parser import (
+    extract_json
 )
 
-        if json_match:
 
-            cleaned = json_match.group(1)
+def hotel_agent(
 
-        else:
+    destinations,
+    preferences
+):
 
-            fallback_match = re.search(
-                r'(\{[\s\S]*\})',
+    selected_hotels = []
+
+    for city in destinations:
+
+        available_hotels = search_hotels(
+            city
+        )
+
+        if not available_hotels:
+            continue
+
+        prompt = f"""
+You are an enterprise hotel recommendation agent.
+
+TASK:
+Select the BEST hotel.
+
+RULES:
+
+1. Prefer business hotels
+2. Prefer office proximity
+3. Prefer good ratings
+4. Prefer reasonable pricing
+5. Return STRICT JSON ONLY
+6. NEVER explain outside JSON
+7. NEVER generate code
+8. NEVER hallucinate hotels
+
+FORMAT:
+
+{{
+  "selected_hotel_id": "",
+  "reason": ""
+}}
+
+USER PREFERENCES:
+{json.dumps(preferences, indent=2)}
+
+AVAILABLE HOTELS:
+{json.dumps(available_hotels, indent=2)}
+"""
+
+        try:
+
+            response = llm.invoke(
+                prompt
+            )
+
+            content = response.content.strip()
+
+            print(
+                "\nHOTEL AGENT RAW OUTPUT:\n"
+            )
+
+            print(content)
+
+            result = extract_json(
                 content
             )
 
-            cleaned = fallback_match.group(1)
+            selected_id = result.get(
+                "selected_hotel_id"
+            )
 
-        parsed = json.loads(cleaned)
+            selected_hotel = next(
 
-        recommendations = parsed[
-            "recommended_hotels"
-        ]
+                (
+                    hotel
 
-        final_hotels = []
+                    for hotel in available_hotels
 
-        for rec in recommendations:
+                    if hotel.get(
+                        "hotel_id"
+                    ) == selected_id
+                ),
 
-            for hotel in hotels:
+                None
+            )
 
-                if (
-                    hotel["hotel_id"]
-                    == rec["hotel_id"]
-                ):
+            if selected_hotel:
 
-                    hotel["reason"] = rec[
-                        "reason"
-                    ]
+                selected_hotel[
+                    "reason"
+                ] = result.get(
+                    "reason",
+                    ""
+                )
 
-                    final_hotels.append(
-                        hotel
-                    )
+                selected_hotels.append(
+                    selected_hotel
+                )
 
-        return final_hotels
+        except Exception as e:
 
-    except Exception as e:
+            print(
+                "\nHOTEL AGENT ERROR:\n"
+            )
 
-        print("\nHOTEL AGENT ERROR:\n")
-        print(e)
+            print(str(e))
 
-        return hotels
+    return selected_hotels

@@ -1,45 +1,51 @@
-from app.graph.workflow import graph
+from app.graph.workflow import (
+    graph
+)
 
 
 class TravelPlannerService:
 
-    @staticmethod
-    def generate_itinerary(
+    def run_trip_planner(
 
-        user_input,
-
-        employee_id
+        self,
+        request_data
     ):
 
         initial_state = {
 
-            "user_input": user_input,
+            "user_input":
+            request_data.get(
+                "user_input"
+            ),
 
-            "employee_id": employee_id,
+            "employee_id":
+            request_data.get(
+                "employee_id"
+            ),
 
-            "parsed_request": {},
+            "parsed_input": {},
 
-            "calendar_events": [],
+            "employee_context": {},
 
-            "calendar_conflicts": [],
+            "request_type": "",
 
             "flight_options": [],
 
             "hotel_options": [],
 
+            "transport_options": [],
+
             "policy_results": {},
+
+            "approval_workflow": {},
 
             "optimized_itinerary": {},
 
+            "calendar_analysis": {},
+
             "final_response": "",
 
-            "execution_logs": [],
-
-            "next_steps": [],
-
-            "request_type": "",
-
-            "employee_context": {}
+            "execution_logs": []
         }
 
         result = graph.invoke(

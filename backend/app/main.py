@@ -1,9 +1,16 @@
 from fastapi import FastAPI
 
+from fastapi.middleware.cors import (
+    CORSMiddleware
+)
+
 from app.api.routes.travel_routes import (
     router as travel_router
 )
 
+from app.api.routes.frontend_routes import (
+    router as frontend_router
+)
 
 app = FastAPI(
 
@@ -11,6 +18,24 @@ app = FastAPI(
 
     version="1.0.0"
 )
+
+# =========================
+# CORS
+# =========================
+
+app.add_middleware(
+
+    CORSMiddleware,
+
+    allow_origins=["*"],
+
+    allow_credentials=True,
+
+    allow_methods=["*"],
+
+    allow_headers=["*"],
+)
+
 
 
 @app.get("/")
@@ -26,4 +51,9 @@ app.include_router(
     travel_router,
 
     prefix="/api"
+)
+
+app.include_router(
+
+    frontend_router
 )

@@ -27,7 +27,9 @@ vectordb = Chroma(
 )
 
 
-def retrieve_policy(query):
+def retrieve_policy(
+    query
+):
 
     docs = vectordb.similarity_search(
 
@@ -36,4 +38,12 @@ def retrieve_policy(query):
         k=3
     )
 
-    return docs
+    context = "\n\n".join(
+
+        [
+            doc.page_content
+            for doc in docs
+        ]
+    )
+
+    return context

@@ -1,27 +1,23 @@
 from app.graph.workflow import graph
-
 initial_state = {
 
-
     "user_input": """
-  Plan a Bangalore business trip next week.
+    I need to travel from Chennai to Bangalore,
+    then Hyderabad,
+    then Mumbai for client meetings next week.
 
-Avoid morning flights.
-
-Prefer business hotels near office.
+    Avoid morning flights and prefer business hotels.
     """,
 
     "employee_id": "EMP001",
 
-    "employee_context": {},
-
     "parsed_request": {},
+
+    "request_type": "",
 
     "next_steps": [],
 
-    "current_step": "",
-
-    "request_type": "",
+    "employee_context": {},
 
     "calendar_events": [],
 
@@ -31,17 +27,18 @@ Prefer business hotels near office.
 
     "hotel_options": [],
 
-    "policy_results": {},
+    "transport_options": [],
 
     "optimized_itinerary": {},
+
+    "policy_results": {},
+
+    "approval_workflow": {},
 
     "final_response": "",
 
     "execution_logs": []
-
 }
-
-
 result = graph.invoke(initial_state)
 
 print("\nFINAL RESPONSE:\n")

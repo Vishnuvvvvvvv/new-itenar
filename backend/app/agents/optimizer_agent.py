@@ -1,363 +1,360 @@
 import json
-import re
 
-from app.core.llm import llm
+from app.core.llm import (
+    llm
+)
 
-
-OPTIMIZER_PROMPT = """
-You are an enterprise AI itinerary optimization agent.
-
-Your responsibilities:
-1. Analyze compliant flight options
-2. Analyze compliant hotel options
-3. Select BEST itinerary
-
-Optimization priorities:
-- policy compliance
-- business convenience
-- user preferences
-- reasonable pricing
-- higher ratings
-- fewer stops
-
-IMPORTANT:
-- Use ONLY provided flight IDs
-- Use ONLY provided hotel IDs
-- Do NOT invent IDs
-- Return ONLY valid JSON
-- No markdown
-- No explanations
-- No Python code
-
-Format:
-
-{{
-    "selected_flight_id": "",
-    "selected_hotel_id": "",
-    "reason": ""
-}}
-
-Compliant Flight Options:
-{flights}
-
-Compliant Hotel Options:
-{hotels}
-
-Policy Results:
-{policy_results}
-"""
+from app.utils.json_parser import (
+    extract_json
+)
 
 
 def optimizer_agent(
 
     flights,
-
     hotels,
-
-    policy_results
+    policy_results,
+    calendar_analysis
 ):
 
     # =========================
-    # TYPE SAFETY
+    # BUILD REQUIRED ROUTES
     # =========================
 
-    safe_flights = []
+    required_routes = []
 
     for flight in flights:
 
-        if isinstance(flight, dict):
+        route = (
 
-            safe_flights.append(
-                flight
+            f"{flight.get('source')}"
+            f"->{flight.get('destination')}"
+        )
+
+        if route not in required_routes:
+
+            required_routes.append(
+                route
             )
 
-    flights = safe_flights
+    # =========================
+    # BUILD REQUIRED CITIES
+    # =========================
 
-    safe_hotels = []
+    required_cities = []
 
     for hotel in hotels:
 
-        if isinstance(hotel, dict):
+        city = hotel.get(
+            "city"
+        )
 
-            safe_hotels.append(
-                hotel
+        if city not in required_cities:
+
+            required_cities.append(
+                city
             )
 
-    hotels = safe_hotels
+    prompt = f"""
+You are an enterprise itinerary optimizer agent.
 
-    # =========================
-    # POLICY FILTERING
-    # =========================
+TASK:
 
-    compliant_flights = []
+1. Select EXACTLY ONE BEST FLIGHT
+   for EACH REQUIRED ROUTE
 
-    compliant_hotels = []
+2. Select EXACTLY ONE BEST HOTEL
+   for EACH REQUIRED CITY
 
-    # -------------------------
-    # FLIGHT FILTER
-    # -------------------------
+3. NEVER skip:
+   - any route
+   - any city
 
-    for flight in flights:
+4. Prioritize:
+   - policy compliance
+   - business convenience
+   - fewer stops
+   - economy class
+   - reasonable pricing
+   - higher ratings
+   - office proximity
 
-        if (
-            flight.get(
-                "travel_class",
-                ""
-            ).lower()
-            == "economy"
-        ):
+5. Avoid:
+   - morning flights
+   - policy violations
+   - expensive hotels
 
-            compliant_flights.append(
-                flight
-            )
+IMPORTANT:
 
-    # -------------------------
-    # HOTEL FILTER
-    # -------------------------
+- MULTI CITY COVERAGE IS MANDATORY
+- ALL ROUTES MUST HAVE FLIGHTS
+- ALL CITIES MUST HAVE HOTELS
 
-    for hotel in hotels:
+Return STRICT JSON ONLY.
 
-        if (
-            hotel.get(
-                "price_per_night",
-                0
-            )
-            <= 6000
-        ):
+DO NOT explain.
+DO NOT add markdown.
+DO NOT generate code.
 
-            compliant_hotels.append(
-                hotel
-            )
+OUTPUT FORMAT:
 
-    # =========================
-    # FALLBACKS
-    # =========================
+{{
+  "selected_flight_ids": [],
+  "selected_hotel_ids": [],
+  "reason": ""
+}}
 
-    if not compliant_flights:
+=========================
+REQUIRED ROUTES
+=========================
 
-        compliant_flights = flights
+{json.dumps(required_routes, indent=2)}
 
-    if not compliant_hotels:
+=========================
+REQUIRED HOTEL CITIES
+=========================
 
-        compliant_hotels = hotels
+{json.dumps(required_cities, indent=2)}
 
-    # =========================
-    # LLM PROMPT
-    # =========================
+=========================
+AVAILABLE FLIGHTS
+=========================
 
-    prompt = OPTIMIZER_PROMPT.format(
+{json.dumps(flights, indent=2)}
 
-        flights=compliant_flights,
+=========================
+AVAILABLE HOTELS
+=========================
 
-        hotels=compliant_hotels,
+{json.dumps(hotels, indent=2)}
 
-        policy_results=policy_results
-    )
+=========================
+POLICY RESULTS
+=========================
 
-    response = llm.invoke(prompt)
+{json.dumps(policy_results, indent=2)}
 
-    content = response.content.strip()
+=========================
+CALENDAR ANALYSIS
+=========================
 
-    print("\nOPTIMIZER AGENT RAW OUTPUT:\n")
-
-    print(content)
+{json.dumps(calendar_analysis, indent=2)}
+"""
 
     try:
 
-        # =========================
-        # JSON EXTRACTION
-        # =========================
+        response = llm.invoke(
+            prompt
+        )
 
-        json_match = re.search(
-            r'(\{[\s\S]*\})',
+        content = response.content.strip()
+
+        print(
+            "\nOPTIMIZER RAW OUTPUT:\n"
+        )
+
+        print(content)
+
+        result = extract_json(
             content
         )
 
-        if not json_match:
-
-            raise Exception(
-                "No JSON found"
-            )
-
-        cleaned = json_match.group(1)
-
-        parsed = json.loads(cleaned)
-
-        selected_flight_id = parsed.get(
-            "selected_flight_id"
+        selected_flight_ids = result.get(
+            "selected_flight_ids",
+            []
         )
 
-        selected_hotel_id = parsed.get(
-            "selected_hotel_id"
-        )
-
-        optimization_reason = parsed.get(
-            "reason",
-            ""
+        selected_hotel_ids = result.get(
+            "selected_hotel_ids",
+            []
         )
 
         # =========================
-        # VALID FLIGHT MAP
+        # LLM SELECTED FLIGHTS
         # =========================
 
-        valid_flight_map = {
+        selected_flights = []
 
-            flight["flight_id"]: flight
+        covered_routes = set()
 
-            for flight in compliant_flights
-        }
+        for flight in flights:
 
-        # =========================
-        # VALID HOTEL MAP
-        # =========================
+            if (
 
-        valid_hotel_map = {
-
-            hotel["hotel_id"]: hotel
-
-            for hotel in compliant_hotels
-        }
-
-        # =========================
-        # MATCH FLIGHT
-        # =========================
-
-        selected_flight = valid_flight_map.get(
-            selected_flight_id
-        )
-
-        # deterministic fallback
-        if not selected_flight:
-
-            compliant_flights.sort(
-
-                key=lambda x: x.get(
-                    "price",
-                    999999
+                flight.get(
+                    "flight_id"
                 )
-            )
 
-            selected_flight = (
-                compliant_flights[0]
-            )
+                in selected_flight_ids
+            ):
+
+                selected_flights.append(
+                    flight
+                )
+
+                route = (
+
+                    f"{flight.get('source')}"
+                    f"->{flight.get('destination')}"
+                )
+
+                covered_routes.add(
+                    route
+                )
 
         # =========================
-        # MATCH HOTEL
+        # ENFORCE ROUTE COVERAGE
         # =========================
 
-        selected_hotel = valid_hotel_map.get(
-            selected_hotel_id
-        )
+        for route in required_routes:
 
-        # deterministic fallback
-        if not selected_hotel:
+            if route not in covered_routes:
 
-            compliant_hotels.sort(
+                source, destination = (
+                    route.split("->")
+                )
 
-                key=lambda x: (
-                    -x.get("rating", 0),
-                    x.get(
-                        "price_per_night",
-                        999999
+                matching = [
+
+                    flight
+
+                    for flight in flights
+
+                    if (
+
+                        flight.get(
+                            "source"
+                        ) == source
+
+                        and
+
+                        flight.get(
+                            "destination"
+                        ) == destination
                     )
-                )
-            )
+                ]
 
-            selected_hotel = (
-                compliant_hotels[0]
-            )
+                if matching:
+
+                    selected_flights.append(
+                        matching[0]
+                    )
+
+        # =========================
+        # LLM SELECTED HOTELS
+        # =========================
+
+        selected_hotels = []
+
+        covered_cities = set()
+
+        for hotel in hotels:
+
+            if (
+
+                hotel.get(
+                    "hotel_id"
+                )
+
+                in selected_hotel_ids
+            ):
+
+                selected_hotels.append(
+                    hotel
+                )
+
+                covered_cities.add(
+                    hotel.get("city")
+                )
+
+        # =========================
+        # ENFORCE CITY COVERAGE
+        # =========================
+
+        for city in required_cities:
+
+            if city not in covered_cities:
+
+                matching = [
+
+                    hotel
+
+                    for hotel in hotels
+
+                    if hotel.get(
+                        "city"
+                    ) == city
+                ]
+
+                if matching:
+
+                    selected_hotels.append(
+                        matching[0]
+                    )
 
         # =========================
         # TOTAL COST
         # =========================
 
-        total_trip_cost = (
+        total_cost = (
 
-            selected_flight.get(
-                "price",
-                0
-            )
+            sum(
 
-            +
-
-            selected_hotel.get(
-                "price_per_night",
-                0
-            )
-        )
-
-        # =========================
-        # FINAL ITINERARY
-        # =========================
-
-        optimized_itinerary = {
-
-            "selected_flight":
-            selected_flight,
-
-            "selected_hotel":
-            selected_hotel,
-
-            "optimization_reason":
-            optimization_reason,
-
-            "total_trip_cost":
-            total_trip_cost
-        }
-
-        return optimized_itinerary
-
-    except Exception as e:
-
-        print("\nOPTIMIZER AGENT ERROR:\n")
-
-        print(e)
-
-        # =========================
-        # SAFE FALLBACKS
-        # =========================
-
-        fallback_flight = (
-
-            compliant_flights[0]
-
-            if compliant_flights
-
-            else {}
-        )
-
-        fallback_hotel = (
-
-            compliant_hotels[0]
-
-            if compliant_hotels
-
-            else {}
-        )
-
-        return {
-
-            "selected_flight":
-            fallback_flight,
-
-            "selected_hotel":
-            fallback_hotel,
-
-            "optimization_reason":
-            "Fallback optimization used.",
-
-            "total_trip_cost":
-            (
-                fallback_flight.get(
+                flight.get(
                     "price",
                     0
                 )
 
-                +
+                for flight in selected_flights
+            )
 
-                fallback_hotel.get(
+            +
+
+            sum(
+
+                hotel.get(
                     "price_per_night",
                     0
                 )
+
+                for hotel in selected_hotels
             )
+        )
+
+        return {
+
+            "selected_flights":
+            selected_flights,
+
+            "selected_hotels":
+            selected_hotels,
+
+            "optimization_reason":
+            result.get(
+                "reason",
+                ""
+            ),
+
+            "total_trip_cost":
+            total_cost
+        }
+
+    except Exception as e:
+
+        print(
+            "\nOPTIMIZER ERROR:\n"
+        )
+
+        print(str(e))
+
+        return {
+
+            "selected_flights": [],
+
+            "selected_hotels": [],
+
+            "optimization_reason":
+            "Fallback optimizer used.",
+
+            "total_trip_cost": 0
         }

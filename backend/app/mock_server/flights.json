@@ -1,49 +1,144 @@
 [
-    {
-        "flight_id": "FL001",
-        "airline": "IndiGo",
-        "source": "Chennai",
-        "destination": "Bangalore",
-        "departure_time": "06:00 AM",
-        "arrival_time": "07:00 AM",
-        "price": 4500,
-        "stops": 0,
-        "travel_class": "economy"
-    },
+  {
+    "flight_id": "FL001",
+    "airline": "IndiGo",
+    "source": "Chennai",
+    "destination": "Bangalore",
+    "departure_time": "06:00 AM",
+    "arrival_time": "07:00 AM",
+    "price": 4500,
+    "stops": 0,
+    "travel_class": "economy"
+  },
+  {
+    "flight_id": "FL002",
+    "airline": "Air India",
+    "source": "Chennai",
+    "destination": "Bangalore",
+    "departure_time": "10:30 AM",
+    "arrival_time": "11:30 AM",
+    "price": 5200,
+    "stops": 0,
+    "travel_class": "economy"
+  },
+  {
+    "flight_id": "FL003",
+    "airline": "Akasa Air",
+    "source": "Bangalore",
+    "destination": "Hyderabad",
+    "departure_time": "01:00 PM",
+    "arrival_time": "02:15 PM",
+    "price": 4800,
+    "stops": 0,
+    "travel_class": "economy"
+  },
+  {
+    "flight_id": "FL004",
+    "airline": "IndiGo",
+    "source": "Hyderabad",
+    "destination": "Mumbai",
+    "departure_time": "04:00 PM",
+    "arrival_time": "05:30 PM",
+    "price": 6200,
+    "stops": 0,
+    "travel_class": "economy"
+  },
+  {
+    "flight_id": "FL005",
+    "airline": "Vistara",
+    "source": "Mumbai",
+    "destination": "Chennai",
+    "departure_time": "07:00 PM",
+    "arrival_time": "09:00 PM",
+    "price": 7300,
+    "stops": 0,
+    "travel_class": "business"
+  },
+  {
+    "flight_id": "FL006",
+    "airline": "Air India",
+    "source": "Bangalore",
+    "destination": "Mumbai",
+    "departure_time": "09:30 AM",
+    "arrival_time": "11:15 AM",
+    "price": 6900,
+    "stops": 0,
+    "travel_class": "economy"
+  },
+  {
+    "flight_id": "FL007",
+    "airline": "SpiceJet",
+    "source": "Mumbai",
+    "destination": "Hyderabad",
+    "departure_time": "03:00 PM",
+    "arrival_time": "04:30 PM",
+    "price": 5100,
+    "stops": 1,
+    "travel_class": "economy"
+  },
 
-    {
-        "flight_id": "FL002",
-        "airline": "Air India",
-        "source": "Chennai",
-        "destination": "Bangalore",
-        "departure_time": "10:30 AM",
-        "arrival_time": "11:30 AM",
-        "price": 5200,
-        "stops": 0,
-        "travel_class": "economy"
-    },
 
-    {
-        "flight_id": "FL003",
-        "airline": "Vistara",
-        "source": "Mumbai",
-        "destination": "Bangalore",
-        "departure_time": "09:00 AM",
-        "arrival_time": "10:30 AM",
-        "price": 6500,
-        "stops": 0,
-        "travel_class": "business"
-    },
 
-    {
-        "flight_id": "FL004",
-        "airline": "IndiGo",
-        "source": "Hyderabad",
-        "destination": "Bangalore",
-        "departure_time": "01:00 PM",
-        "arrival_time": "02:00 PM",
-        "price": 3500,
-        "stops": 0,
-        "travel_class": "economy"
-    }
+  
+  {
+    "flight_id": "FL101",
+    "airline": "IndiGo",
+    "source": "Chennai",
+    "destination": "Bangalore",
+    "departure_time": "02:00 PM",
+    "arrival_time": "03:00 PM",
+    "price": 4300,
+    "stops": 0,
+    "travel_class": "economy"
+  },
+  {
+    "flight_id": "FL102",
+    "airline": "Air India",
+    "source": "Chennai",
+    "destination": "Bangalore",
+    "departure_time": "06:00 PM",
+    "arrival_time": "07:10 PM",
+    "price": 5100,
+    "stops": 0,
+    "travel_class": "economy"
+  },
+  {
+    "flight_id": "FL103",
+    "airline": "IndiGo",
+    "source": "Bangalore",
+    "destination": "Hyderabad",
+    "departure_time": "03:30 PM",
+    "arrival_time": "04:30 PM",
+    "price": 3900,
+    "stops": 0,
+    "travel_class": "economy"
+  },
+  {
+    "flight_id": "FL104",
+    "airline": "Air India",
+    "source": "Hyderabad",
+    "destination": "Mumbai",
+    "departure_time": "07:00 PM",
+    "arrival_time": "08:45 PM",
+    "price": 5500,
+    "stops": 0,
+    "travel_class": "economy"
+  },
+  {
+    "flight_id": "FL105",
+    "airline": "Akasa Air",
+    "source": "Hyderabad",
+    "destination": "Mumbai",
+    "departure_time": "05:00 PM",
+    "arrival_time": "06:40 PM",
+    "price": 4800,
+    "stops": 0,
+    "travel_class": "economy"
+  }
+
+
+
+
+
+
 ]

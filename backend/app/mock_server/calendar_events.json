@@ -1,0 +1,106 @@
+[
+  {
+    "employee_id": "EMP001",
+    "city": "Bangalore",
+    "meeting_title": "Client Architecture Workshop",
+    "meeting_date": "2026-05-20",
+    "meeting_time": "02:00 PM",
+    "office_location": "Electronic City"
+  },
+  {
+    "employee_id": "EMP001",
+    "city": "Hyderabad",
+    "meeting_title": "Platform Review Meeting",
+    "meeting_date": "2026-05-21",
+    "meeting_time": "11:00 AM",
+    "office_location": "Hitech City"
+  },
+  {
+    "employee_id": "EMP001",
+    "city": "Mumbai",
+    "meeting_title": "Executive Strategy Meeting",
+    "meeting_date": "2026-05-22",
+    "meeting_time": "04:00 PM",
+    "office_location": "BKC"
+  },
+  {
+    "employee_id": "EMP002",
+    "city": "Bangalore",
+    "meeting_title": "Finance Planning Session",
+    "meeting_date": "2026-05-20",
+    "meeting_time": "10:00 AM",
+    "office_location": "MG Road"
+  },
+  {
+    "employee_id": "EMP002",
+    "city": "Mumbai",
+    "meeting_title": "Quarterly Budget Review",
+    "meeting_date": "2026-05-23",
+    "meeting_time": "09:00 AM",
+    "office_location": "Nariman Point"
+  },
+  {
+    "employee_id": "EMP003",
+    "city": "Bangalore",
+    "meeting_title": "Backend Engineering Sync",
+    "meeting_date": "2026-05-20",
+    "meeting_time": "01:00 PM",
+    "office_location": "Whitefield"
+  },
+  {
+    "employee_id": "EMP003",
+    "city": "Hyderabad",
+    "meeting_title": "API Integration Workshop",
+    "meeting_date": "2026-05-21",
+    "meeting_time": "08:30 AM",
+    "office_location": "Financial District"
+  },
+  {
+    "employee_id": "EMP004",
+    "city": "Mumbai",
+    "meeting_title": "HR Leadership Meet",
+    "meeting_date": "2026-05-22",
+    "meeting_time": "03:00 PM",
+    "office_location": "Andheri"
+  },
+  {
+    "employee_id": "EMP004",
+    "city": "Bangalore",
+    "meeting_title": "Recruitment Strategy Session",
+    "meeting_date": "2026-05-23",
+    "meeting_time": "11:30 AM",
+    "office_location": "Koramangala"
+  },
+  {
+    "employee_id": "EMP005",
+    "city": "Delhi",
+    "meeting_title": "Sales Leadership Summit",
+    "meeting_date": "2026-05-20",
+    "meeting_time": "05:00 PM",
+    "office_location": "Connaught Place"
+  },
+  {
+    "employee_id": "EMP005",
+    "city": "Mumbai",
+    "meeting_title": "Enterprise Client Pitch",
+    "meeting_date": "2026-05-21",
+    "meeting_time": "12:00 PM",
+    "office_location": "BKC"
+  },
+  {
+    "employee_id": "EMP006",
+    "city": "Hyderabad",
+    "meeting_title": "Operations Governance Review",
+    "meeting_date": "2026-05-20",
+    "meeting_time": "09:30 AM",
+    "office_location": "Gachibowli"
+  },
+  {
+    "employee_id": "EMP006",
+    "city": "Bangalore",
+    "meeting_title": "Vendor Coordination Meeting",
+    "meeting_date": "2026-05-21",
+    "meeting_time": "06:00 PM",
+    "office_location": "Manyata Tech Park"
+  }
+]

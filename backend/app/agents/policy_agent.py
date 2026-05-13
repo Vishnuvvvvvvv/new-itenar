@@ -1,245 +1,130 @@
 import json
-import re
 
-from app.core.llm import llm
+from app.core.llm import (
+    llm
+)
 
 from app.rag.retriever import (
     retrieve_policy
 )
 
-
-POLICY_AGENT_PROMPT = """
-You are an enterprise AI travel compliance agent.
-
-Your responsibilities:
-1. Analyze selected itinerary
-2. Analyze retrieved company policies
-3. Detect REAL violations ONLY
-4. NEVER hallucinate
-5. ONLY use explicitly provided fields
-6. If itinerary already satisfies a policy,
-   DO NOT report violation
-
-VERY IMPORTANT RULES:
-- Do NOT invent missing information
-- Do NOT assume policy violations
-- ONLY validate based on provided data
-- Economy flights are policy compliant
-- If hotel exceeds allowed budget,
-  report violation
-- If total cost exceeds limit,
-  report violation
-
-Return ONLY valid JSON.
-
-Format:
-
-{{
-    "compliant": true,
-    "violations": [],
-    "recommendations": []
-}}
-
-Selected Flight:
-{flight}
-
-Selected Hotel:
-{hotel}
-
-Retrieved Policies:
-{policies}
-"""
+from app.utils.json_parser import (
+    extract_json
+)
 
 
 def policy_agent(
 
-    selected_flight,
-
-    selected_hotel
+    flights,
+    hotels,
+    employee_context,
+    total_cost
 ):
 
-    # =========================
-    # RAG RETRIEVAL
-    # =========================
-
-    retrieval_query = """
-
-    flight policy
-    hotel budget
-    travel approval
-    airline rules
-    economy class
-
-    """
-
-    docs = retrieve_policy(
-        retrieval_query
+    department = employee_context.get(
+        "department",
+        ""
     )
 
-    policy_text = "\n".join([
-        doc.page_content
-        for doc in docs
-    ])
-
-    # =========================
-    # PROMPT
-    # =========================
-
-    prompt = POLICY_AGENT_PROMPT.format(
-
-        flight=selected_flight,
-
-        hotel=selected_hotel,
-
-        policies=policy_text
+    designation = employee_context.get(
+        "designation",
+        ""
     )
 
-    response = llm.invoke(prompt)
+    query = f"""
+Department: {department}
+Designation: {designation}
+Travel Policy
+"""
 
-    content = response.content
+    policy_context = retrieve_policy(
+        query
+    )
 
-    print("\nPOLICY AGENT RAW OUTPUT:\n")
-    print(content)
+    prompt = f"""
+You are an enterprise travel policy validation agent.
+
+STRICTLY validate itinerary ONLY using retrieved policy documents.
+
+DO NOT invent policies.
+DO NOT hallucinate rules.
+DO NOT assume restrictions.
+
+=========================
+POLICY DOCUMENTS
+=========================
+
+{policy_context}
+
+=========================
+FLIGHTS
+=========================
+
+{json.dumps(flights, indent=2)}
+
+=========================
+HOTELS
+=========================
+
+{json.dumps(hotels, indent=2)}
+
+=========================
+TOTAL COST
+=========================
+
+{total_cost}
+
+=========================
+
+Validate:
+- flight compliance
+- hotel compliance
+- approval requirements
+- airline restrictions
+- budget rules
+
+Return STRICT JSON ONLY.
+
+DO NOT explain.
+DO NOT generate markdown.
+DO NOT generate code.
+
+OUTPUT FORMAT:
+
+{{
+  "compliant": true,
+  "violations": [],
+  "recommendations": []
+}}
+"""
 
     try:
 
-        # =========================
-        # JSON EXTRACTION
-        # =========================
+        response = llm.invoke(
+            prompt
+        )
 
-        json_match = re.search(
-            r'\{[\s\S]*\}',
+        content = response.content.strip()
+
+        print(
+            "\nPOLICY AGENT RAW OUTPUT:\n"
+        )
+
+        print(content)
+
+        result = extract_json(
             content
         )
 
-        cleaned = json_match.group()
-
-        parsed = json.loads(cleaned)
-
-        # =========================
-        # DETERMINISTIC VALIDATION
-        # =========================
-
-        validated_violations = []
-
-        validated_recommendations = []
-
-        # -------------------------
-        # HOTEL BUDGET VALIDATION
-        # -------------------------
-
-        hotel_price = selected_hotel.get(
-            "price_per_night",
-            0
-        )
-
-        if hotel_price > 6000:
-
-            validated_violations.append({
-
-                "policy":
-                "Hotel budget policy",
-
-                "description":
-                "Hotel price exceeds allowed limit of ₹6000/night"
-            })
-
-            validated_recommendations.append({
-
-                "policy":
-                "Hotel budget policy",
-
-                "description":
-                "Choose lower-cost hotel"
-            })
-
-        # -------------------------
-        # TOTAL TRIP COST
-        # -------------------------
-
-        flight_price = selected_flight.get(
-            "price",
-            0
-        )
-
-        total_trip_cost = (
-            hotel_price + flight_price
-        )
-
-        if total_trip_cost > 20000:
-
-            validated_violations.append({
-
-                "policy":
-                "Trip approval policy",
-
-                "description":
-                "Trip exceeds ₹20000 approval threshold"
-            })
-
-            validated_recommendations.append({
-
-                "policy":
-                "Trip approval policy",
-
-                "description":
-                "Manager approval required"
-            })
-
-        # -------------------------
-        # FLIGHT CLASS VALIDATION
-        # -------------------------
-
-        travel_class = selected_flight.get(
-            "travel_class",
-            ""
-        )
-
-        if (
-            travel_class.lower()
-            != "economy"
-        ):
-
-            validated_violations.append({
-
-                "policy":
-                "Flight class policy",
-
-                "description":
-                "Only economy flights allowed"
-            })
-
-            validated_recommendations.append({
-
-                "policy":
-                "Flight class policy",
-
-                "description":
-                "Choose economy class flight"
-            })
-
-        # =========================
-        # FINAL STRUCTURED RESULT
-        # =========================
-
-        final_result = {
-
-            "compliant":
-            len(validated_violations) == 0,
-
-            "violations":
-            validated_violations,
-
-            "recommendations":
-            validated_recommendations
-        }
-
-        return final_result
+        return result
 
     except Exception as e:
 
-        print("\nPOLICY AGENT ERROR:\n")
-        print(e)
+        print(
+            "\nPOLICY AGENT ERROR:\n"
+        )
+
+        print(str(e))
 
         return {
 

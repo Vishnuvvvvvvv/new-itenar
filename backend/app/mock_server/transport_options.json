@@ -1,0 +1,34 @@
+[
+  {
+    "transport_id": "TR001",
+    "city": "Bangalore",
+    "transport_type": "Metro",
+    "coverage_area": "Electronic City",
+    "estimated_cost": 120,
+    "comfort_level": "medium"
+  },
+  {
+    "transport_id": "TR002",
+    "city": "Bangalore",
+    "transport_type": "Taxi",
+    "coverage_area": "Electronic City",
+    "estimated_cost": 450,
+    "comfort_level": "high"
+  },
+  {
+    "transport_id": "TR003",
+    "city": "Hyderabad",
+    "transport_type": "Cab",
+    "coverage_area": "Gachibowli",
+    "estimated_cost": 300,
+    "comfort_level": "high"
+  },
+  {
+    "transport_id": "TR004",
+    "city": "Mumbai",
+    "transport_type": "Metro",
+    "coverage_area": "BKC",
+    "estimated_cost": 150,
+    "comfort_level": "medium"
+  }
+]

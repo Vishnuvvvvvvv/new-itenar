@@ -1,7 +1,5 @@
-from app.graph.state import TravelState
-
-from app.db.mock_flight_db import (
-    get_flights
+from app.graph.state import (
+    TravelState
 )
 
 from app.agents.flight_agent import (
@@ -18,9 +16,14 @@ def flight_node(
         {}
     )
 
-    employee_context = state.get(
-        "employee_context",
-        {}
+    source = parsed_request.get(
+        "source",
+        ""
+    )
+
+    destinations = parsed_request.get(
+        "destinations",
+        []
     )
 
     preferences = parsed_request.get(
@@ -28,64 +31,20 @@ def flight_node(
         []
     )
 
-    destination = parsed_request.get(
-        "destination",
-        ""
+    employee_context = state.get(
+        "employee_context",
+        {}
     )
 
-    employee_location = employee_context.get(
-        "employee_location",
-        ""
+    selected_flights = flight_agent(
+
+        source,
+        destinations,
+        preferences
     )
-
-    # =========================
-    # FETCH FLIGHTS
-    # =========================
-
-    flights = get_flights(
-
-        employee_location,
-
-        destination
-    )
-
-    # =========================
-    # ENSURE VALID LIST
-    # =========================
-
-    if not isinstance(
-        flights,
-        list
-    ):
-
-        flights = []
-
-    # =========================
-    # LLM FILTERING
-    # =========================
-
-    recommended_flights = flight_agent(
-
-        preferences,
-
-        flights,
-
-        employee_context
-    )
-
-    # =========================
-    # FINAL SAFETY
-    # =========================
-
-    if not isinstance(
-        recommended_flights,
-        list
-    ):
-
-        recommended_flights = flights
 
     state["flight_options"] = (
-        recommended_flights
+        selected_flights
     )
 
     state["execution_logs"].append(

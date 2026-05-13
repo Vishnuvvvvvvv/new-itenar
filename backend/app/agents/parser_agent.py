@@ -1,71 +1,76 @@
-import json
-import re
+from app.core.llm import (
+    llm
+)
 
-from app.core.llm import llm
+from app.utils.json_parser import (
+    extract_json
+)
 
 
-PARSER_PROMPT = """
-You are an enterprise AI travel planning assistant.
+def parser_agent(
+    user_input
+):
 
-Extract travel information from the user request.
+    prompt = f"""
+You are an enterprise travel parser agent.
 
-Return ONLY valid JSON.
+Extract structured travel planning information.
 
-Required JSON format:
+IMPORTANT:
+- Return STRICT JSON ONLY
+- DO NOT explain
+- DO NOT generate markdown
+- DO NOT generate code
+
+OUTPUT FORMAT:
 
 {{
-    "destination": "",
-    "date": "",
-    "purpose": "",
-    "preferences": []
+  "source": "",
+  "destinations": [],
+  "start_date": "",
+  "end_date": "",
+  "purpose": "",
+  "meetings": [
+    {{
+      "city": "",
+      "date": "",
+      "time": "",
+      "location": ""
+    }}
+  ],
+  "preferences": []
 }}
 
-User Request:
+USER INPUT:
 {user_input}
 """
 
-
-def parser_agent(user_input: str):
-
-    prompt = PARSER_PROMPT.format(
-        user_input=user_input
-    )
-
-    response = llm.invoke(prompt)
-
-    content = response.content
-
-    print("\nRAW LLM OUTPUT:\n")
-    print(content)
-
     try:
 
-        # Extract ONLY JSON block
-        json_match = re.search(
-            r'\{[\s\S]*\}',
+        response = llm.invoke(
+            prompt
+        )
+
+        content = response.content.strip()
+
+        print(
+            "\nRAW LLM OUTPUT:\n"
+        )
+
+        print(content)
+
+        parsed = extract_json(
             content
         )
 
-        if json_match:
-
-            cleaned = json_match.group()
-
-            parsed_data = json.loads(cleaned)
-
-            return parsed_data
-
-        raise ValueError(
-            "No JSON found"
-        )
+        return parsed
 
     except Exception as e:
 
-        print("\nJSON PARSE ERROR:\n")
-        print(e)
+        print(
+            "\nPARSER ERROR:\n"
+        )
 
-        return {
-            "destination": "",
-            "date": "",
-            "purpose": "",
-            "preferences": []
-        }
+        print(str(e))
+
+        return {}

@@ -1,162 +1,170 @@
 import json
-import re
 
-from app.core.llm import llm
+from app.core.llm import (
+    llm
+)
 
-
-FLIGHT_AGENT_PROMPT = """
-You are an enterprise AI flight recommendation agent.
-
-IMPORTANT:
-- Use ONLY provided flight IDs
-- Do NOT invent IDs
-- Return ONLY valid JSON
-- No markdown
-- No explanations
-- No Python code
-
-Format:
-
-{{
-    "recommended_flights": [
-        {{
-            "flight_id": "",
-            "reason": ""
-        }}
-    ]
-}}
-
-Available Flights:
-{flights}
-
-User Preferences:
-{preferences}
-"""
+from app.db.mock_flight_db import (
+    search_flights
+)
 
 
 def flight_agent(
 
-    preferences,
-
-    flights,
-
-    employee_context=None
+    source,
+    destinations,
+    preferences
 ):
 
-    prompt = FLIGHT_AGENT_PROMPT.format(
+    all_selected_flights = []
 
-        preferences=preferences,
+    current_source = source
 
-        flights=flights
-    )
+    for destination in destinations:
 
-    response = llm.invoke(prompt)
+        available_flights = search_flights(
 
-    content = response.content.strip()
-
-    print("\nFLIGHT AGENT RAW OUTPUT:\n")
-
-    print(content)
-
-    try:
-
-        # =========================
-        # JSON EXTRACTION
-        # =========================
-
-        json_match = re.search(
-            r'(\{[\s\S]*\})',
-            content
+            current_source,
+            destination
         )
 
-        if not json_match:
+        if not available_flights:
+            current_source = destination
+            continue
 
-            return flights
+        prompt = f"""
+You are an enterprise travel flight recommendation agent.
 
-        cleaned = json_match.group(1)
+TASK:
+Select the BEST flight.
 
-        parsed = json.loads(cleaned)
+RULES:
 
-        recommended = parsed.get(
-            "recommended_flights",
-            []
-        )
+1. Prefer economy flights
+2. Avoid morning flights if requested
+3. Prefer fewer stops
+4. Prefer cheaper flights
+5. Prefer business-friendly timings
+6. NEVER hallucinate
+7. ONLY use provided flights
+8. RETURN STRICT JSON ONLY
 
-        # ensure list
-        if not isinstance(
-            recommended,
-            list
-        ):
+OUTPUT FORMAT:
 
-            return flights
+{{
+  "selected_flight_id": "",
+  "reason": ""
+}}
 
-        final_flights = []
+USER PREFERENCES:
+{json.dumps(preferences, indent=2)}
 
-        valid_flight_map = {
+AVAILABLE FLIGHTS:
+{json.dumps(available_flights, indent=2)}
+"""
 
-            flight["flight_id"]: flight
+        try:
 
-            for flight in flights
-
-            if isinstance(flight, dict)
-        }
-
-        # =========================
-        # SAFE MATCHING
-        # =========================
-
-        for item in recommended:
-
-            if not isinstance(
-                item,
-                dict
-            ):
-
-                continue
-
-            flight_id = item.get(
-                "flight_id"
+            response = llm.invoke(
+                prompt
             )
 
-            reason = item.get(
-                "reason",
-                ""
+            content = response.content.strip()
+
+            print(
+                "\nFLIGHT AGENT RAW OUTPUT:\n"
             )
 
-            if (
-                flight_id
-                in valid_flight_map
-            ):
+            print(content)
 
-                matched_flight = dict(
+            if "```json" in content:
 
-                    valid_flight_map[
-                        flight_id
-                    ]
-                )
+                content = content.split(
+                    "```json"
+                )[1].split(
+                    "```"
+                )[0]
 
-                matched_flight[
+            result = json.loads(
+                content
+            )
+
+            selected_id = result.get(
+                "selected_flight_id"
+            )
+
+            selected_flight = next(
+
+                (
+                    flight
+
+                    for flight in available_flights
+
+                    if flight.get(
+                        "flight_id"
+                    ) == selected_id
+                ),
+
+                None
+            )
+
+            if selected_flight:
+
+                selected_flight[
                     "reason"
-                ] = reason
-
-                final_flights.append(
-                    matched_flight
+                ] = result.get(
+                    "reason",
+                    ""
                 )
 
-        # =========================
-        # SAFE FALLBACK
-        # =========================
+                all_selected_flights.append(
+                    selected_flight
+                )
 
-        if not final_flights:
+        except Exception as e:
 
-            return flights
+            print(
+                "\nFLIGHT AGENT ERROR:\n"
+            )
 
-        return final_flights
+            print(str(e))
 
-    except Exception as e:
+            fallback_flights = sorted(
 
-        print("\nFLIGHT AGENT ERROR:\n")
+                available_flights,
 
-        print(e)
+                key=lambda x: (
 
-        return flights
+                    x.get(
+                        "travel_class"
+                    ) != "economy",
+
+                    x.get(
+                        "stops",
+                        99
+                    ),
+
+                    x.get(
+                        "price",
+                        999999
+                    )
+                )
+            )
+
+            if fallback_flights:
+
+                fallback = fallback_flights[0]
+
+                fallback[
+                    "reason"
+                ] = (
+                    "Fallback selection used."
+                )
+
+                all_selected_flights.append(
+                    fallback
+                )
+
+        current_source = destination
+
+    return all_selected_flights

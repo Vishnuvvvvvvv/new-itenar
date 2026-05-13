@@ -1,46 +1,32 @@
 [
-    {
-        "hotel_id": "HT001",
-        "hotel_name": "Taj Business Hotel",
-        "city": "Bangalore",
-        "hotel_type": "business",
-        "location_area": "MG Road",
-        "price_per_night": 8500,
-        "rating": 4.7
-    },
-
-    {
-        "hotel_id": "HT002",
-        "hotel_name": "Budget Inn",
-        "city": "Bangalore",
-        "hotel_type": "budget",
-        "location_area": "Electronic City",
-        "price_per_night": 3500,
-        "rating": 3.9
-    },
-
-    {
-        "hotel_id": "HT003",
-        "hotel_name": "Elite Suites",
-        "city": "Bangalore",
-        "hotel_type": "business",
-        "location_area": "Whitefield",
-        "price_per_night": 7200,
-        "rating": 4.5
-    },
-
-    {
-        "hotel_id": "HT004",
-        "hotel_name": "Luxury Residency",
-        "city": "Mumbai",
-        "hotel_type": "luxury",
-        "location_area": "BKC",
-        "price_per_night": 12000,
-        "rating": 4.8
-    },
-
-
-    {
+  {
+    "hotel_id": "HT001",
+    "hotel_name": "Taj Business Hotel",
+    "city": "Bangalore",
+    "hotel_type": "business",
+    "location_area": "MG Road",
+    "price_per_night": 8500,
+    "rating": 4.7
+  },
+  {
+    "hotel_id": "HT002",
+    "hotel_name": "Comfort Stay",
+    "city": "Bangalore",
+    "hotel_type": "budget",
+    "location_area": "Indiranagar",
+    "price_per_night": 4200,
+    "rating": 4.0
+  },
+  {
+    "hotel_id": "HT003",
+    "hotel_name": "Elite Suites",
+    "city": "Bangalore",
+    "hotel_type": "business",
+    "location_area": "Whitefield",
+    "price_per_night": 7200,
+    "rating": 4.5
+  },
+  {
     "hotel_id": "HT004",
     "hotel_name": "Budget Inn",
     "city": "Bangalore",
@@ -48,5 +34,151 @@
     "location_area": "Electronic City",
     "price_per_night": 5500,
     "rating": 4.2
-}
+  },
+  {
+    "hotel_id": "HT005",
+    "hotel_name": "Grand Residency",
+    "city": "Bangalore",
+    "hotel_type": "luxury",
+    "location_area": "Koramangala",
+    "price_per_night": 12000,
+    "rating": 4.9
+  },
+  {
+    "hotel_id": "HT006",
+    "hotel_name": "Corporate Nest",
+    "city": "Bangalore",
+    "hotel_type": "business",
+    "location_area": "Manyata Tech Park",
+    "price_per_night": 6100,
+    "rating": 4.4
+  },
+  {
+    "hotel_id": "HT007",
+    "hotel_name": "Transit Lodge",
+    "city": "Bangalore",
+    "hotel_type": "budget",
+    "location_area": "Airport Road",
+    "price_per_night": 3000,
+    "rating": 3.8
+  },
+  {
+    "hotel_id": "HT008",
+    "hotel_name": "Executive Palace",
+    "city": "Bangalore",
+    "hotel_type": "business",
+    "location_area": "Whitefield",
+    "price_per_night": 5900,
+    "rating": 4.3
+  },
+  {
+    "hotel_id": "HT009",
+    "hotel_name": "Skyline Suites",
+    "city": "Bangalore",
+    "hotel_type": "luxury",
+    "location_area": "MG Road",
+    "price_per_night": 15000,
+    "rating": 4.8
+  },
+  {
+    "hotel_id": "HT010",
+    "hotel_name": "WorkHub Residency",
+    "city": "Bangalore",
+    "hotel_type": "business",
+    "location_area": "Electronic City",
+    "price_per_night": 4800,
+    "rating": 4.1
+  },
+  {
+  "hotel_id": "HT020",
+  "hotel_name": "Cyber Towers Residency",
+  "city": "Hyderabad",
+  "hotel_type": "business",
+  "location_area": "Hitech City",
+  "price_per_night": 5200,
+  "rating": 4.3
+},
+{
+  "hotel_id": "HT021",
+  "hotel_name": "Deccan Corporate Stay",
+  "city": "Hyderabad",
+  "hotel_type": "business",
+  "location_area": "Gachibowli",
+  "price_per_night": 6100,
+  "rating": 4.5
+},
+{
+  "hotel_id": "HT030",
+  "hotel_name": "Mumbai Executive Inn",
+  "city": "Mumbai",
+  "hotel_type": "business",
+  "location_area": "BKC",
+  "price_per_night": 5800,
+  "rating": 4.2
+},
+{
+  "hotel_id": "HT031",
+  "hotel_name": "Marine Corporate Hotel",
+  "city": "Mumbai",
+  "hotel_type": "business",
+  "location_area": "Nariman Point",
+  "price_per_night": 7200,
+  "rating": 4.6
+},
+
+  {
+    "hotel_id": "HT101",
+    "hotel_name": "Tech Park Residency",
+    "city": "Bangalore",
+    "hotel_type": "business",
+    "location_area": "Electronic City",
+    "price_per_night": 5200,
+    "rating": 4.5
+  },
+  {
+    "hotel_id": "HT102",
+    "hotel_name": "Metro Business Suites",
+    "city": "Bangalore",
+    "hotel_type": "business",
+    "location_area": "Whitefield",
+    "price_per_night": 5600,
+    "rating": 4.4
+  },
+  {
+    "hotel_id": "HT103",
+    "hotel_name": "Cyber Corporate Stay",
+    "city": "Hyderabad",
+    "hotel_type": "business",
+    "location_area": "Hitech City",
+    "price_per_night": 5400,
+    "rating": 4.5
+  },
+  {
+    "hotel_id": "HT104",
+    "hotel_name": "Gateway Residency",
+    "city": "Hyderabad",
+    "hotel_type": "business",
+    "location_area": "Gachibowli",
+    "price_per_night": 5000,
+    "rating": 4.3
+  },
+  {
+    "hotel_id": "HT105",
+    "hotel_name": "BKC Business Hub",
+    "city": "Mumbai",
+    "hotel_type": "business",
+    "location_area": "BKC",
+    "price_per_night": 5900,
+    "rating": 4.4
+  },
+  {
+    "hotel_id": "HT106",
+    "hotel_name": "Marine Corporate Inn",
+    "city": "Mumbai",
+    "hotel_type": "business",
+    "location_area": "Nariman Point",
+    "price_per_night": 5700,
+    "rating": 4.5
+  }
+
 ]
