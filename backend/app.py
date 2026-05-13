@@ -1,285 +1,259 @@
 import streamlit as st
 import requests
-from datetime import datetime
 
-# =====================================
+# =========================================
 # PAGE CONFIG
-# =====================================
+# =========================================
 
 st.set_page_config(
-
     page_title="Enterprise AI Travel Copilot",
-
     layout="wide",
-
     initial_sidebar_state="collapsed"
 )
 
-# =====================================
+# =========================================
 # CUSTOM CSS
-# =====================================
+# =========================================
 
-st.markdown("""
+st.markdown(
+    """
+    <style>
 
-<style>
+    .stApp {
+        background-color: #f5f7fb;
+    }
 
-html, body, [class*="css"]  {
+    html, body, [class*="css"] {
+        font-family: 'Segoe UI', sans-serif;
+    }
 
-    font-family: 'Segoe UI', sans-serif;
+    .main-title {
+        font-size: 38px;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 0px;
+    }
 
-    background-color: #f4f7fb;
-}
+    .sub-title {
+        color: #6b7280;
+        margin-bottom: 25px;
+    }
 
-/* =========================
-   HEADER
-========================= */
+    .user-box {
 
-.main-title {
+        background:
+            linear-gradient(
+                135deg,
+                #2563eb,
+                #1d4ed8
+            );
 
-    font-size: 34px;
+        color: white;
 
-    font-weight: 700;
+        padding: 14px;
 
-    color: #111827;
+        border-radius: 18px;
 
-    margin-bottom: 5px;
-}
+        margin-bottom: 12px;
 
-.sub-title {
+        margin-left: 50px;
 
-    color: #6b7280;
+        box-shadow:
+            0px 4px 12px
+            rgba(0,0,0,0.12);
+    }
 
-    margin-bottom: 25px;
-}
+    .assistant-box {
 
-/* =========================
-   CHAT
-========================= */
+        background: white;
 
-.user-message {
+        color: #111827;
 
-    background: linear-gradient(
-        135deg,
-        #2563eb,
-        #1d4ed8
-    );
+        padding: 14px;
 
-    color: white;
+        border-radius: 18px;
 
-    padding: 14px;
+        margin-bottom: 12px;
 
-    border-radius: 16px;
+        margin-right: 50px;
 
-    margin-bottom: 12px;
+        box-shadow:
+            0px 4px 12px
+            rgba(0,0,0,0.08);
+    }
 
-    margin-left: 40px;
+    .trip-summary {
 
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.12);
-}
+        background:
+            linear-gradient(
+                135deg,
+                #111827,
+                #1f2937
+            );
 
-.assistant-message {
+        color: white;
 
-    background: white;
+        padding: 28px;
 
-    padding: 14px;
+        border-radius: 24px;
 
-    border-radius: 16px;
+        margin-bottom: 25px;
 
-    margin-bottom: 12px;
+        box-shadow:
+            0px 8px 24px
+            rgba(0,0,0,0.18);
+    }
 
-    margin-right: 40px;
+    .trip-price {
 
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
-}
+        font-size: 42px;
 
-/* =========================
-   TRIP HEADER
-========================= */
+        font-weight: 700;
 
-.trip-header {
+        color: #34d399;
 
-    background: linear-gradient(
-        135deg,
-        #111827,
-        #1f2937
-    );
+        margin-top: 12px;
+    }
 
-    color: white;
+    .timeline-card {
 
-    padding: 28px;
+        background: white;
 
-    border-radius: 22px;
+        padding: 22px;
 
-    margin-bottom: 22px;
+        border-radius: 20px;
 
-    box-shadow: 0px 6px 18px rgba(0,0,0,0.18);
-}
+        margin-bottom: 18px;
 
-.trip-cost {
+        border-left:
+            6px solid #2563eb;
 
-    font-size: 38px;
+        box-shadow:
+            0px 4px 12px
+            rgba(0,0,0,0.08);
+    }
 
-    font-weight: bold;
+    .timeline-title {
 
-    color: #34d399;
-}
+        font-size: 22px;
 
-/* =========================
-   TIMELINE
-========================= */
+        font-weight: 700;
 
-.timeline-card {
+        color: #111827;
 
-    background: white;
+        margin-bottom: 8px;
+    }
 
-    padding: 22px;
+    .timeline-sub {
 
-    border-radius: 20px;
+        color: #6b7280;
 
-    margin-bottom: 18px;
+        margin-bottom: 6px;
+    }
 
-    border-left: 6px solid #2563eb;
+    .timeline-price {
 
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
-}
+        color: #059669;
 
-.timeline-date {
+        font-size: 24px;
 
-    font-size: 18px;
+        font-weight: bold;
 
-    font-weight: bold;
+        margin-top: 10px;
+    }
 
-    color: #2563eb;
+    .chip {
 
-    margin-bottom: 12px;
-}
+        display: inline-block;
 
-.timeline-title {
+        padding: 8px 14px;
 
-    font-size: 22px;
+        border-radius: 999px;
 
-    font-weight: bold;
+        font-size: 13px;
 
-    color: #111827;
+        font-weight: 600;
 
-    margin-bottom: 10px;
-}
+        margin-right: 10px;
 
-.timeline-sub {
+        margin-bottom: 12px;
+    }
 
-    color: #6b7280;
+    .green-chip {
 
-    margin-bottom: 8px;
-}
+        background: #dcfce7;
 
-.price {
+        color: #166534;
+    }
 
-    font-size: 22px;
+    .orange-chip {
 
-    font-weight: bold;
+        background: #fed7aa;
 
-    color: #059669;
-}
+        color: #9a3412;
+    }
 
-/* =========================
-   STATUS CHIPS
-========================= */
+    .red-chip {
 
-.chip {
+        background: #fee2e2;
 
-    display: inline-block;
+        color: #991b1b;
+    }
 
-    padding: 8px 14px;
+    .cost-card {
 
-    border-radius: 999px;
+        background: white;
 
-    margin-right: 8px;
+        padding: 24px;
 
-    font-size: 13px;
+        border-radius: 20px;
 
-    font-weight: 600;
-}
+        box-shadow:
+            0px 4px 12px
+            rgba(0,0,0,0.08);
 
-.green-chip {
+        margin-top: 15px;
+    }
 
-    background: #dcfce7;
+    .cost-row {
 
-    color: #166534;
-}
+        display: flex;
 
-.orange-chip {
+        justify-content: space-between;
 
-    background: #fed7aa;
+        margin-bottom: 12px;
+    }
 
-    color: #9a3412;
-}
+    .cost-total {
 
-.red-chip {
+        font-size: 24px;
 
-    background: #fee2e2;
+        font-weight: 700;
 
-    color: #991b1b;
-}
+        color: #111827;
+    }
 
-/* =========================
-   COST SUMMARY
-========================= */
+    .policy-warning {
 
-.summary-card {
+        background: #fee2e2;
 
-    background: white;
+        color: #991b1b;
 
-    padding: 22px;
+        padding: 12px;
 
-    border-radius: 20px;
+        border-radius: 12px;
 
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
+        margin-bottom: 10px;
+    }
 
-    margin-bottom: 18px;
-}
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
-.summary-title {
-
-    font-size: 20px;
-
-    font-weight: bold;
-
-    margin-bottom: 14px;
-}
-
-.summary-row {
-
-    display: flex;
-
-    justify-content: space-between;
-
-    margin-bottom: 10px;
-}
-
-/* =========================
-   POLICY
-========================= */
-
-.policy-warning {
-
-    background: #fee2e2;
-
-    color: #991b1b;
-
-    padding: 12px;
-
-    border-radius: 12px;
-
-    margin-top: 10px;
-}
-
-</style>
-
-""", unsafe_allow_html=True)
-
-# =====================================
+# =========================================
 # SESSION STATE
-# =====================================
+# =========================================
 
 if "messages" not in st.session_state:
 
@@ -289,85 +263,79 @@ if "trip_data" not in st.session_state:
 
     st.session_state.trip_data = None
 
-# =====================================
-# API
-# =====================================
+if "awaiting_approval" not in st.session_state:
+
+    st.session_state.awaiting_approval = False
+# =========================================
+# CONVERSATIONAL MEMORY
+# =========================================
+
+if "last_trip_prompt" not in st.session_state:
+
+    st.session_state.last_trip_prompt = ""
+# =========================================
+# BACKEND URL
+# =========================================
 
 BACKEND_URL = (
     "http://127.0.0.1:8000/frontend-plan-trip"
 )
 
-# =====================================
+# =========================================
 # LAYOUT
-# =====================================
+# =========================================
 
-left_col, right_col = st.columns([1, 1.6])
+left_col, right_col = st.columns([1, 1.5])
 
-# =====================================
+# =========================================
 # LEFT PANEL
-# =====================================
+# =========================================
 
 with left_col:
 
     st.markdown(
-
         """
         <div class='main-title'>
-        Enterprise AI Travel Copilot
+        AI Travel Copilot
         </div>
 
         <div class='sub-title'>
-        Intelligent business trip orchestration
+        Enterprise Business Travel Planner
         </div>
         """,
-
         unsafe_allow_html=True
     )
 
-    # =========================
+    # =====================================
     # CHAT HISTORY
-    # =========================
+    # =====================================
 
     for msg in st.session_state.messages:
 
         if msg["role"] == "user":
 
             st.markdown(
-
                 f"""
-                <div class='user-message'>
+                <div class='user-box'>
                 {msg['content']}
                 </div>
                 """,
-
                 unsafe_allow_html=True
             )
 
         else:
 
             st.markdown(
-
                 f"""
-                <div class='assistant-message'>
+                <div class='assistant-box'>
                 {msg['content']}
                 </div>
                 """,
-
                 unsafe_allow_html=True
             )
 
-    # =========================
-    # USER INPUT
-    # =========================
-
-    user_input = st.chat_input(
-        "Describe your business trip..."
-    )
-
     employee_id = st.selectbox(
-
         "Employee",
-
         [
             "EMP001",
             "EMP002",
@@ -375,9 +343,13 @@ with left_col:
         ]
     )
 
-    # =========================
-    # SEND
-    # =========================
+    user_input = st.chat_input(
+        "Describe your business trip..."
+    )
+
+    # =====================================
+    # USER INPUT
+    # =====================================
 
     if user_input:
 
@@ -388,6 +360,85 @@ with left_col:
             "content": user_input
         })
 
+        # =================================
+        # APPROVAL FLOW
+        # =================================
+
+        if st.session_state.awaiting_approval:
+
+            lower_input = user_input.lower()
+
+            # =============================
+            # APPROVE
+            # =============================
+
+            if lower_input in [
+
+                "yes",
+                "y",
+                "approve",
+                "proceed",
+                "go ahead",
+                "submit approval"
+            ]:
+
+                assistant_reply = """
+Approval workflow initiated successfully.
+
+✔ Approval Status: Approved
+
+✔ Manager approval simulated successfully
+
+✔ Booking process can now proceed
+
+✔ Your itinerary has been confirmed
+"""
+
+                st.session_state.messages.append({
+
+                    "role": "assistant",
+
+                    "content": assistant_reply
+                })
+
+                st.session_state.awaiting_approval = False
+
+                st.rerun()
+
+            # =============================
+            # CANCEL
+            # =============================
+
+            elif lower_input in [
+
+                "no",
+                "cancel",
+                "stop"
+            ]:
+
+                assistant_reply = """
+Understood.
+
+The itinerary was NOT submitted for approval.
+
+No bookings were made.
+"""
+
+                st.session_state.messages.append({
+
+                    "role": "assistant",
+
+                    "content": assistant_reply
+                })
+
+                st.session_state.awaiting_approval = False
+
+                st.rerun()
+
+        # =================================
+        # NORMAL FLOW
+        # =================================
+
         payload = {
 
             "user_input": user_input,
@@ -395,11 +446,12 @@ with left_col:
             "employee_id": employee_id
         }
 
-        with st.spinner(
-            "Optimizing itinerary..."
-        ):
+        try:
 
-            try:
+            with st.spinner(
+
+                "Optimizing itinerary..."
+            ):
 
                 response = requests.post(
 
@@ -408,65 +460,95 @@ with left_col:
                     json=payload
                 )
 
-                if response.status_code != 200:
+            if response.status_code == 200:
 
-                    st.error(
-                        "Backend error occurred"
-                    )
+                data = response.json()
+
+                st.session_state.trip_data = data
+
+                itinerary = data.get(
+
+                    "itinerary",
+
+                    {}
+                )
+
+                approval = data.get(
+
+                    "approval",
+
+                    {}
+                )
+
+                approval_required = approval.get(
+
+                    "approval_required",
+
+                    False
+                )
+
+                # =========================
+                # APPROVAL REQUIRED
+                # =========================
+
+                if approval_required:
+
+                    st.session_state.awaiting_approval = True
+
+                    assistant_reply = f"""
+I found an optimized itinerary for your business trip.
+
+However approval is required because:
+
+• {approval.get('reason')}
+
+Would you like me to proceed with manager approval?
+"""
+
+                # =========================
+                # POLICY COMPLIANT
+                # =========================
 
                 else:
 
-                    data = response.json()
+                    assistant_reply = f"""
+Your itinerary is ready.
 
-                    st.session_state.trip_data = data
+✔ Flights selected:
+{len(itinerary.get('selected_flights', []))}
 
-                    itinerary = data.get(
-                        "itinerary",
-                        {}
-                    )
+✔ Hotels selected:
+{len(itinerary.get('selected_hotels', []))}
 
-                    selected_flights = itinerary.get(
-                        "selected_flights",
-                        []
-                    )
+✔ Estimated total cost:
+₹{itinerary.get('total_trip_cost', 0)}
 
-                    selected_hotels = itinerary.get(
-                        "selected_hotels",
-                        []
-                    )
-
-                    assistant_message = f"""
-I found the best itinerary for your business trip.
-
-✔ {len(selected_flights)} optimized flights selected
-
-✔ {len(selected_hotels)} business hotels selected
-
-✔ Total estimated cost: ₹{itinerary.get('total_trip_cost', 0)}
-
-The itinerary has been optimized based on:
-• timing preferences
-• policy compliance
-• office proximity
-• business convenience
+The trip is policy compliant and ready for booking.
 """
 
-                    st.session_state.messages.append({
+                st.session_state.messages.append({
 
-                        "role": "assistant",
+                    "role": "assistant",
 
-                        "content": assistant_message
-                    })
+                    "content": assistant_reply
+                })
 
-                    st.rerun()
+                st.rerun()
 
-            except Exception as e:
+            else:
 
-                st.error(str(e))
+                st.error(
 
-# =====================================
+                    f"Backend Error: {response.status_code}"
+                )
+
+        except Exception as e:
+
+            st.error(str(e))
+
+# =========================================
 # RIGHT PANEL
-# =====================================
+# =========================================
 
 with right_col:
 
@@ -485,6 +567,21 @@ with right_col:
             {}
         )
 
+        flights = itinerary.get(
+            "selected_flights",
+            []
+        )
+
+        hotels = itinerary.get(
+            "selected_hotels",
+            []
+        )
+
+        total_cost = itinerary.get(
+            "total_trip_cost",
+            0
+        )
+
         policy = data.get(
             "policy",
             {}
@@ -495,59 +592,41 @@ with right_col:
             {}
         )
 
-        transports = data.get(
-            "transports",
-            []
-        )
+        # =================================
+        # ROUTE
+        # =================================
 
-        calendar_analysis = data.get(
-            "calendar_analysis",
-            {}
-        )
+        route_parts = []
 
-        selected_flights = itinerary.get(
-            "selected_flights",
-            []
-        )
+        for flight in flights:
 
-        selected_hotels = itinerary.get(
-            "selected_hotels",
-            []
-        )
+            route_parts.append(
+                flight.get("source", "")
+            )
 
-        total_cost = itinerary.get(
-            "total_trip_cost",
-            0
-        )
+        if flights:
 
-        # =====================================
-        # HEADER
-        # =====================================
-
-        trip_route = " → ".join([
-
-            flight.get("source", "")
-
-            for flight in selected_flights
-        ])
-
-        if selected_flights:
-
-            trip_route += (
-                " → "
-                + selected_flights[-1].get(
+            route_parts.append(
+                flights[-1].get(
                     "destination",
                     ""
                 )
             )
 
-        st.markdown(
+        trip_route = " → ".join(
+            route_parts
+        )
 
+        # =================================
+        # SUMMARY
+        # =================================
+
+        st.markdown(
             f"""
-            <div class='trip-header'>
+            <div class='trip-summary'>
 
             <h1>
-            Enterprise Business Trip
+            Optimized Enterprise Itinerary
             </h1>
 
             <p>
@@ -555,50 +634,40 @@ with right_col:
             </p>
 
             <p>
-            ✈ {len(selected_flights)} Flights
+            ✈ {len(flights)} Flights
             •
-            🏨 {len(selected_hotels)} Hotels
+            🏨 {len(hotels)} Hotels
             </p>
 
-            <div class='trip-cost'>
+            <div class='trip-price'>
             ₹ {total_cost}
             </div>
 
             </div>
             """,
-
             unsafe_allow_html=True
         )
 
-        # =====================================
-        # STATUS
-        # =====================================
-
-        compliant = policy.get(
-            "compliant",
-            False
-        )
+        # =================================
+        # STATUS CHIPS
+        # =================================
 
         status_html = ""
 
-        if compliant:
+        if policy.get("compliant"):
 
             status_html += """
-
             <span class='chip green-chip'>
             Policy Compliant
             </span>
-
             """
 
         else:
 
             status_html += """
-
             <span class='chip red-chip'>
             Policy Violations
             </span>
-
             """
 
         if approval.get(
@@ -606,11 +675,9 @@ with right_col:
         ):
 
             status_html += """
-
             <span class='chip orange-chip'>
             Approval Required
             </span>
-
             """
 
         st.markdown(
@@ -618,37 +685,21 @@ with right_col:
             unsafe_allow_html=True
         )
 
-        st.markdown("<br>",
-                    unsafe_allow_html=True)
-
-        # =====================================
-        # TIMELINE
-        # =====================================
-
-        st.subheader(
-            "Trip Timeline"
+        st.markdown(
+            "### Trip Timeline"
         )
 
-        for index in range(
-            len(selected_flights)
-        ):
+        # =================================
+        # TIMELINE
+        # =================================
 
-            flight = selected_flights[index]
+        for i in range(len(flights)):
 
-            hotel = None
-
-            if index < len(selected_hotels):
-
-                hotel = selected_hotels[index]
+            flight = flights[i]
 
             st.markdown(
-
                 f"""
                 <div class='timeline-card'>
-
-                <div class='timeline-date'>
-                Flight {index + 1}
-                </div>
 
                 <div class='timeline-title'>
                 ✈ {flight.get('source')}
@@ -657,8 +708,11 @@ with right_col:
                 </div>
 
                 <div class='timeline-sub'>
+                Airline:
                 {flight.get('airline')}
-                •
+                </div>
+
+                <div class='timeline-sub'>
                 Flight ID:
                 {flight.get('flight_id')}
                 </div>
@@ -678,20 +732,20 @@ with right_col:
                 {flight.get('stops')}
                 </div>
 
-                <div class='price'>
+                <div class='timeline-price'>
                 ₹ {flight.get('price')}
                 </div>
 
                 </div>
                 """,
-
                 unsafe_allow_html=True
             )
 
-            if hotel:
+            if i < len(hotels):
+
+                hotel = hotels[i]
 
                 st.markdown(
-
                     f"""
                     <div class='timeline-card'>
 
@@ -719,3598 +773,63 @@ with right_col:
                     {hotel.get('hotel_id')}
                     </div>
 
-                    <div class='price'>
+                    <div class='timeline-price'>
                     ₹ {hotel.get('price_per_night')}
                     / night
                     </div>
 
                     </div>
                     """,
-
                     unsafe_allow_html=True
                 )
 
-        # =====================================
-        # COST SUMMARY
-        # =====================================
-
-        flight_cost = sum([
-
-            f.get("price", 0)
-
-            for f in selected_flights
-        ])
-
-        hotel_cost = sum([
-
-            h.get("price_per_night", 0)
-
-            for h in selected_hotels
-        ])
-
-        transport_cost = sum([
-
-            t.get(
-                "estimated_cost",
-                0
-            )
-
-            for t in transports
-        ])
+        # =================================
+        # POLICY ANALYSIS
+        # =================================
 
         st.markdown(
-
-            f"""
-            <div class='summary-card'>
-
-            <div class='summary-title'>
-            Cost Breakdown
-            </div>
-
-            <div class='summary-row'>
-            <span>Flights</span>
-            <span>₹ {flight_cost}</span>
-            </div>
-
-            <div class='summary-row'>
-            <span>Hotels</span>
-            <span>₹ {hotel_cost}</span>
-            </div>
-
-            <div class='summary-row'>
-            <span>Transport</span>
-            <span>₹ {transport_cost}</span>
-            </div>
-
-            <hr>
-
-            <div class='summary-row'>
-            <strong>Total</strong>
-            <strong>₹ {total_cost}</strong>
-            </div>
-
-            </div>
-            """,
-
-            unsafe_allow_html=True
+            "### Policy Analysis"
         )
-
-        # =====================================
-        # POLICY WARNINGS
-        # =====================================
 
         violations = policy.get(
             "violations",
             []
         )
 
-        if violations:
+        if not violations:
 
-            st.subheader(
-                "Policy Analysis"
+            st.success(
+                "Trip is policy compliant"
             )
+
+        else:
 
             for violation in violations:
 
-                st.markdown(
-
-                    f"""
-                    <div class='policy-warning'>
-                    {violation.get('description')}
-                    </div>
-                    """,
-
-                    unsafe_allow_html=True
-                )
-
-        # =====================================
-        # APPROVAL
-        # =====================================
-
-        st.subheader(
-            "Approval Workflow"
-        )
-
-        st.markdown(
-
-            f"""
-            <div class='summary-card'>
-
-            <div class='summary-row'>
-            <span>Approval Required</span>
-            <strong>
-            {approval.get('approval_required')}
-            </strong>
-            </div>
-
-            <div class='summary-row'>
-            <span>Approval Level</span>
-            <strong>
-            {approval.get('approval_level')}
-            </strong>
-            </div>
-
-            <div class='summary-row'>
-            <span>Reason</span>
-            <strong>
-            {approval.get('reason')}
-            </strong>
-            </div>
-
-            </div>
-            """,
-
-            unsafe_allow_html=True
-        )import streamlit as st
-import requests
-from datetime import datetime
-
-# =====================================
-# PAGE CONFIG
-# =====================================
-
-st.set_page_config(
-
-    page_title="Enterprise AI Travel Copilot",
-
-    layout="wide",
-
-    initial_sidebar_state="collapsed"
-)
-
-# =====================================
-# CUSTOM CSS
-# =====================================
-
-st.markdown("""
-
-<style>
-
-html, body, [class*="css"]  {
-
-    font-family: 'Segoe UI', sans-serif;
-
-    background-color: #f4f7fb;
-}
-
-/* =========================
-   HEADER
-========================= */
-
-.main-title {
-
-    font-size: 34px;
-
-    font-weight: 700;
-
-    color: #111827;
-
-    margin-bottom: 5px;
-}
-
-.sub-title {
-
-    color: #6b7280;
-
-    margin-bottom: 25px;
-}
-
-/* =========================
-   CHAT
-========================= */
-
-.user-message {
-
-    background: linear-gradient(
-        135deg,
-        #2563eb,
-        #1d4ed8
-    );
-
-    color: white;
-
-    padding: 14px;
-
-    border-radius: 16px;
-
-    margin-bottom: 12px;
-
-    margin-left: 40px;
-
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.12);
-}
-
-.assistant-message {
-
-    background: white;
-
-    padding: 14px;
-
-    border-radius: 16px;
-
-    margin-bottom: 12px;
-
-    margin-right: 40px;
-
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
-}
-
-/* =========================
-   TRIP HEADER
-========================= */
-
-.trip-header {
-
-    background: linear-gradient(
-        135deg,
-        #111827,
-        #1f2937
-    );
-
-    color: white;
-
-    padding: 28px;
-
-    border-radius: 22px;
-
-    margin-bottom: 22px;
-
-    box-shadow: 0px 6px 18px rgba(0,0,0,0.18);
-}
-
-.trip-cost {
-
-    font-size: 38px;
-
-    font-weight: bold;
-
-    color: #34d399;
-}
-
-/* =========================
-   TIMELINE
-========================= */
-
-.timeline-card {
-
-    background: white;
-
-    padding: 22px;
-
-    border-radius: 20px;
-
-    margin-bottom: 18px;
-
-    border-left: 6px solid #2563eb;
-
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
-}
-
-.timeline-date {
-
-    font-size: 18px;
-
-    font-weight: bold;
-
-    color: #2563eb;
-
-    margin-bottom: 12px;
-}
-
-.timeline-title {
-
-    font-size: 22px;
-
-    font-weight: bold;
-
-    color: #111827;
-
-    margin-bottom: 10px;
-}
-
-.timeline-sub {
-
-    color: #6b7280;
-
-    margin-bottom: 8px;
-}
-
-.price {
-
-    font-size: 22px;
-
-    font-weight: bold;
-
-    color: #059669;
-}
-
-/* =========================
-   STATUS CHIPS
-========================= */
-
-.chip {
-
-    display: inline-block;
-
-    padding: 8px 14px;
-
-    border-radius: 999px;
-
-    margin-right: 8px;
-
-    font-size: 13px;
-
-    font-weight: 600;
-}
-
-.green-chip {
-
-    background: #dcfce7;
-
-    color: #166534;
-}
-
-.orange-chip {
-
-    background: #fed7aa;
-
-    color: #9a3412;
-}
-
-.red-chip {
-
-    background: #fee2e2;
-
-    color: #991b1b;
-}
-
-/* =========================
-   COST SUMMARY
-========================= */
-
-.summary-card {
-
-    background: white;
-
-    padding: 22px;
-
-    border-radius: 20px;
-
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
-
-    margin-bottom: 18px;
-}
-
-.summary-title {
-
-    font-size: 20px;
-
-    font-weight: bold;
-
-    margin-bottom: 14px;
-}
-
-.summary-row {
-
-    display: flex;
-
-    justify-content: space-between;
-
-    margin-bottom: 10px;
-}
-
-/* =========================
-   POLICY
-========================= */
-
-.policy-warning {
-
-    background: #fee2e2;
-
-    color: #991b1b;
-
-    padding: 12px;
-
-    border-radius: 12px;
-
-    margin-top: 10px;
-}
-
-</style>
-
-""", unsafe_allow_html=True)
-
-# =====================================
-# SESSION STATE
-# =====================================
-
-if "messages" not in st.session_state:
-
-    st.session_state.messages = []
-
-if "trip_data" not in st.session_state:
-
-    st.session_state.trip_data = None
-
-# =====================================
-# API
-# =====================================
-
-BACKEND_URL = (
-    "http://127.0.0.1:8000/frontend-plan-trip"
-)
-
-# =====================================
-# LAYOUT
-# =====================================
-
-left_col, right_col = st.columns([1, 1.6])
-
-# =====================================
-# LEFT PANEL
-# =====================================
-
-with left_col:
-
-    st.markdown(
-
-        """
-        <div class='main-title'>
-        Enterprise AI Travel Copilot
-        </div>
-
-        <div class='sub-title'>
-        Intelligent business trip orchestration
-        </div>
-        """,
-
-        unsafe_allow_html=True
-    )
-
-    # =========================
-    # CHAT HISTORY
-    # =========================
-
-    for msg in st.session_state.messages:
-
-        if msg["role"] == "user":
-
-            st.markdown(
-
-                f"""
-                <div class='user-message'>
-                {msg['content']}
-                </div>
-                """,
-
-                unsafe_allow_html=True
-            )
-
-        else:
-
-            st.markdown(
-
-                f"""
-                <div class='assistant-message'>
-                {msg['content']}
-                </div>
-                """,
-
-                unsafe_allow_html=True
-            )
-
-    # =========================
-    # USER INPUT
-    # =========================
-
-    user_input = st.chat_input(
-        "Describe your business trip..."
-    )
-
-    employee_id = st.selectbox(
-
-        "Employee",
-
-        [
-            "EMP001",
-            "EMP002",
-            "EMP003"
-        ]
-    )
-
-    # =========================
-    # SEND
-    # =========================
-
-    if user_input:
-
-        st.session_state.messages.append({
-
-            "role": "user",
-
-            "content": user_input
-        })
-
-        payload = {
-
-            "user_input": user_input,
-
-            "employee_id": employee_id
-        }
-
-        with st.spinner(
-            "Optimizing itinerary..."
-        ):
-
-            try:
-
-                response = requests.post(
-
-                    BACKEND_URL,
-
-                    json=payload
-                )
-
-                if response.status_code != 200:
-
-                    st.error(
-                        "Backend error occurred"
+                if isinstance(
+                    violation,
+                    str
+                ):
+
+                    st.markdown(
+                        f"""
+                        <div class='policy-warning'>
+                        {violation}
+                        </div>
+                        """,
+                        unsafe_allow_html=True
                     )
 
-                else:
+                elif isinstance(
+                    violation,
+                    dict
+                ):
 
-                    data = response.json()
-
-                    st.session_state.trip_data = data
-
-                    itinerary = data.get(
-                        "itinerary",
-                        {}
+                    st.markdown(
+                        f"""
+                        <div class='policy-warning'>
+                        {violation.get('description', '')}
+                        </div>
+                        """,
+                        unsafe_allow_html=True
                     )
-
-                    selected_flights = itinerary.get(
-                        "selected_flights",
-                        []
-                    )
-
-                    selected_hotels = itinerary.get(
-                        "selected_hotels",
-                        []
-                    )
-
-                    assistant_message = f"""
-I found the best itinerary for your business trip.
-
-✔ {len(selected_flights)} optimized flights selected
-
-✔ {len(selected_hotels)} business hotels selected
-
-✔ Total estimated cost: ₹{itinerary.get('total_trip_cost', 0)}
-
-The itinerary has been optimized based on:
-• timing preferences
-• policy compliance
-• office proximity
-• business convenience
-"""
-
-                    st.session_state.messages.append({
-
-                        "role": "assistant",
-
-                        "content": assistant_message
-                    })
-
-                    st.rerun()
-
-            except Exception as e:
-
-                st.error(str(e))
-
-# =====================================
-# RIGHT PANEL
-# =====================================
-
-with right_col:
-
-    data = st.session_state.trip_data
-
-    if not data:
-
-        st.info(
-            "No itinerary generated yet."
-        )
-
-    else:
-
-        itinerary = data.get(
-            "itinerary",
-            {}
-        )
-
-        policy = data.get(
-            "policy",
-            {}
-        )
-
-        approval = data.get(
-            "approval",
-            {}
-        )
-
-        transports = data.get(
-            "transports",
-            []
-        )
-
-        calendar_analysis = data.get(
-            "calendar_analysis",
-            {}
-        )
-
-        selected_flights = itinerary.get(
-            "selected_flights",
-            []
-        )
-
-        selected_hotels = itinerary.get(
-            "selected_hotels",
-            []
-        )
-
-        total_cost = itinerary.get(
-            "total_trip_cost",
-            0
-        )
-
-        # =====================================
-        # HEADER
-        # =====================================
-
-        trip_route = " → ".join([
-
-            flight.get("source", "")
-
-            for flight in selected_flights
-        ])
-
-        if selected_flights:
-
-            trip_route += (
-                " → "
-                + selected_flights[-1].get(
-                    "destination",
-                    ""
-                )
-            )
-
-        st.markdown(
-
-            f"""
-            <div class='trip-header'>
-
-            <h1>
-            Enterprise Business Trip
-            </h1>
-
-            <p>
-            📍 {trip_route}
-            </p>
-
-            <p>
-            ✈ {len(selected_flights)} Flights
-            •
-            🏨 {len(selected_hotels)} Hotels
-            </p>
-
-            <div class='trip-cost'>
-            ₹ {total_cost}
-            </div>
-
-            </div>
-            """,
-
-            unsafe_allow_html=True
-        )
-
-        # =====================================
-        # STATUS
-        # =====================================
-
-        compliant = policy.get(
-            "compliant",
-            False
-        )
-
-        status_html = ""
-
-        if compliant:
-
-            status_html += """
-
-            <span class='chip green-chip'>
-            Policy Compliant
-            </span>
-
-            """
-
-        else:
-
-            status_html += """
-
-            <span class='chip red-chip'>
-            Policy Violations
-            </span>
-
-            """
-
-        if approval.get(
-            "approval_required"
-        ):
-
-            status_html += """
-
-            <span class='chip orange-chip'>
-            Approval Required
-            </span>
-
-            """
-
-        st.markdown(
-            status_html,
-            unsafe_allow_html=True
-        )
-
-        st.markdown("<br>",
-                    unsafe_allow_html=True)
-
-        # =====================================
-        # TIMELINE
-        # =====================================
-
-        st.subheader(
-            "Trip Timeline"
-        )
-
-        for index in range(
-            len(selected_flights)
-        ):
-
-            flight = selected_flights[index]
-
-            hotel = None
-
-            if index < len(selected_hotels):
-
-                hotel = selected_hotels[index]
-
-            st.markdown(
-
-                f"""
-                <div class='timeline-card'>
-
-                <div class='timeline-date'>
-                Flight {index + 1}
-                </div>
-
-                <div class='timeline-title'>
-                ✈ {flight.get('source')}
-                →
-                {flight.get('destination')}
-                </div>
-
-                <div class='timeline-sub'>
-                {flight.get('airline')}
-                •
-                Flight ID:
-                {flight.get('flight_id')}
-                </div>
-
-                <div class='timeline-sub'>
-                Departure:
-                {flight.get('departure_time')}
-                </div>
-
-                <div class='timeline-sub'>
-                Arrival:
-                {flight.get('arrival_time')}
-                </div>
-
-                <div class='timeline-sub'>
-                Stops:
-                {flight.get('stops')}
-                </div>
-
-                <div class='price'>
-                ₹ {flight.get('price')}
-                </div>
-
-                </div>
-                """,
-
-                unsafe_allow_html=True
-            )
-
-            if hotel:
-
-                st.markdown(
-
-                    f"""
-                    <div class='timeline-card'>
-
-                    <div class='timeline-title'>
-                    🏨 {hotel.get('hotel_name')}
-                    </div>
-
-                    <div class='timeline-sub'>
-                    City:
-                    {hotel.get('city')}
-                    </div>
-
-                    <div class='timeline-sub'>
-                    Area:
-                    {hotel.get('location_area')}
-                    </div>
-
-                    <div class='timeline-sub'>
-                    Rating:
-                    ⭐ {hotel.get('rating')}
-                    </div>
-
-                    <div class='timeline-sub'>
-                    Hotel ID:
-                    {hotel.get('hotel_id')}
-                    </div>
-
-                    <div class='price'>
-                    ₹ {hotel.get('price_per_night')}
-                    / night
-                    </div>
-
-                    </div>
-                    """,
-
-                    unsafe_allow_html=True
-                )
-
-        # =====================================
-        # COST SUMMARY
-        # =====================================
-
-        flight_cost = sum([
-
-            f.get("price", 0)
-
-            for f in selected_flights
-        ])
-
-        hotel_cost = sum([
-
-            h.get("price_per_night", 0)
-
-            for h in selected_hotels
-        ])
-
-        transport_cost = sum([
-
-            t.get(
-                "estimated_cost",
-                0
-            )
-
-            for t in transports
-        ])
-
-        st.markdown(
-
-            f"""
-            <div class='summary-card'>
-
-            <div class='summary-title'>
-            Cost Breakdown
-            </div>
-
-            <div class='summary-row'>
-            <span>Flights</span>
-            <span>₹ {flight_cost}</span>
-            </div>
-
-            <div class='summary-row'>
-            <span>Hotels</span>
-            <span>₹ {hotel_cost}</span>
-            </div>
-
-            <div class='summary-row'>
-            <span>Transport</span>
-            <span>₹ {transport_cost}</span>
-            </div>
-
-            <hr>
-
-            <div class='summary-row'>
-            <strong>Total</strong>
-            <strong>₹ {total_cost}</strong>
-            </div>
-
-            </div>
-            """,
-
-            unsafe_allow_html=True
-        )
-
-        # =====================================
-        # POLICY WARNINGS
-        # =====================================
-
-        violations = policy.get(
-            "violations",
-            []
-        )
-
-        if violations:
-
-            st.subheader(
-                "Policy Analysis"
-            )
-
-            for violation in violations:
-
-                st.markdown(
-
-                    f"""
-                    <div class='policy-warning'>
-                    {violation.get('description')}
-                    </div>
-                    """,
-
-                    unsafe_allow_html=True
-                )
-
-        # =====================================
-        # APPROVAL
-        # =====================================
-
-        st.subheader(
-            "Approval Workflow"
-        )
-
-        st.markdown(
-
-            f"""
-            <div class='summary-card'>
-
-            <div class='summary-row'>
-            <span>Approval Required</span>
-            <strong>
-            {approval.get('approval_required')}
-            </strong>
-            </div>
-
-            <div class='summary-row'>
-            <span>Approval Level</span>
-            <strong>
-            {approval.get('approval_level')}
-            </strong>
-            </div>
-
-            <div class='summary-row'>
-            <span>Reason</span>
-            <strong>
-            {approval.get('reason')}
-            </strong>
-            </div>
-
-            </div>
-            """,
-
-            unsafe_allow_html=True
-        )import streamlit as st
-import requests
-from datetime import datetime
-
-# =====================================
-# PAGE CONFIG
-# =====================================
-
-st.set_page_config(
-
-    page_title="Enterprise AI Travel Copilot",
-
-    layout="wide",
-
-    initial_sidebar_state="collapsed"
-)
-
-# =====================================
-# CUSTOM CSS
-# =====================================
-
-st.markdown("""
-
-<style>
-
-html, body, [class*="css"]  {
-
-    font-family: 'Segoe UI', sans-serif;
-
-    background-color: #f4f7fb;
-}
-
-/* =========================
-   HEADER
-========================= */
-
-.main-title {
-
-    font-size: 34px;
-
-    font-weight: 700;
-
-    color: #111827;
-
-    margin-bottom: 5px;
-}
-
-.sub-title {
-
-    color: #6b7280;
-
-    margin-bottom: 25px;
-}
-
-/* =========================
-   CHAT
-========================= */
-
-.user-message {
-
-    background: linear-gradient(
-        135deg,
-        #2563eb,
-        #1d4ed8
-    );
-
-    color: white;
-
-    padding: 14px;
-
-    border-radius: 16px;
-
-    margin-bottom: 12px;
-
-    margin-left: 40px;
-
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.12);
-}
-
-.assistant-message {
-
-    background: white;
-
-    padding: 14px;
-
-    border-radius: 16px;
-
-    margin-bottom: 12px;
-
-    margin-right: 40px;
-
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
-}
-
-/* =========================
-   TRIP HEADER
-========================= */
-
-.trip-header {
-
-    background: linear-gradient(
-        135deg,
-        #111827,
-        #1f2937
-    );
-
-    color: white;
-
-    padding: 28px;
-
-    border-radius: 22px;
-
-    margin-bottom: 22px;
-
-    box-shadow: 0px 6px 18px rgba(0,0,0,0.18);
-}
-
-.trip-cost {
-
-    font-size: 38px;
-
-    font-weight: bold;
-
-    color: #34d399;
-}
-
-/* =========================
-   TIMELINE
-========================= */
-
-.timeline-card {
-
-    background: white;
-
-    padding: 22px;
-
-    border-radius: 20px;
-
-    margin-bottom: 18px;
-
-    border-left: 6px solid #2563eb;
-
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
-}
-
-.timeline-date {
-
-    font-size: 18px;
-
-    font-weight: bold;
-
-    color: #2563eb;
-
-    margin-bottom: 12px;
-}
-
-.timeline-title {
-
-    font-size: 22px;
-
-    font-weight: bold;
-
-    color: #111827;
-
-    margin-bottom: 10px;
-}
-
-.timeline-sub {
-
-    color: #6b7280;
-
-    margin-bottom: 8px;
-}
-
-.price {
-
-    font-size: 22px;
-
-    font-weight: bold;
-
-    color: #059669;
-}
-
-/* =========================
-   STATUS CHIPS
-========================= */
-
-.chip {
-
-    display: inline-block;
-
-    padding: 8px 14px;
-
-    border-radius: 999px;
-
-    margin-right: 8px;
-
-    font-size: 13px;
-
-    font-weight: 600;
-}
-
-.green-chip {
-
-    background: #dcfce7;
-
-    color: #166534;
-}
-
-.orange-chip {
-
-    background: #fed7aa;
-
-    color: #9a3412;
-}
-
-.red-chip {
-
-    background: #fee2e2;
-
-    color: #991b1b;
-}
-
-/* =========================
-   COST SUMMARY
-========================= */
-
-.summary-card {
-
-    background: white;
-
-    padding: 22px;
-
-    border-radius: 20px;
-
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
-
-    margin-bottom: 18px;
-}
-
-.summary-title {
-
-    font-size: 20px;
-
-    font-weight: bold;
-
-    margin-bottom: 14px;
-}
-
-.summary-row {
-
-    display: flex;
-
-    justify-content: space-between;
-
-    margin-bottom: 10px;
-}
-
-/* =========================
-   POLICY
-========================= */
-
-.policy-warning {
-
-    background: #fee2e2;
-
-    color: #991b1b;
-
-    padding: 12px;
-
-    border-radius: 12px;
-
-    margin-top: 10px;
-}
-
-</style>
-
-""", unsafe_allow_html=True)
-
-# =====================================
-# SESSION STATE
-# =====================================
-
-if "messages" not in st.session_state:
-
-    st.session_state.messages = []
-
-if "trip_data" not in st.session_state:
-
-    st.session_state.trip_data = None
-
-# =====================================
-# API
-# =====================================
-
-BACKEND_URL = (
-    "http://127.0.0.1:8000/frontend-plan-trip"
-)
-
-# =====================================
-# LAYOUT
-# =====================================
-
-left_col, right_col = st.columns([1, 1.6])
-
-# =====================================
-# LEFT PANEL
-# =====================================
-
-with left_col:
-
-    st.markdown(
-
-        """
-        <div class='main-title'>
-        Enterprise AI Travel Copilot
-        </div>
-
-        <div class='sub-title'>
-        Intelligent business trip orchestration
-        </div>
-        """,
-
-        unsafe_allow_html=True
-    )
-
-    # =========================
-    # CHAT HISTORY
-    # =========================
-
-    for msg in st.session_state.messages:
-
-        if msg["role"] == "user":
-
-            st.markdown(
-
-                f"""
-                <div class='user-message'>
-                {msg['content']}
-                </div>
-                """,
-
-                unsafe_allow_html=True
-            )
-
-        else:
-
-            st.markdown(
-
-                f"""
-                <div class='assistant-message'>
-                {msg['content']}
-                </div>
-                """,
-
-                unsafe_allow_html=True
-            )
-
-    # =========================
-    # USER INPUT
-    # =========================
-
-    user_input = st.chat_input(
-        "Describe your business trip..."
-    )
-
-    employee_id = st.selectbox(
-
-        "Employee",
-
-        [
-            "EMP001",
-            "EMP002",
-            "EMP003"
-        ]
-    )
-
-    # =========================
-    # SEND
-    # =========================
-
-    if user_input:
-
-        st.session_state.messages.append({
-
-            "role": "user",
-
-            "content": user_input
-        })
-
-        payload = {
-
-            "user_input": user_input,
-
-            "employee_id": employee_id
-        }
-
-        with st.spinner(
-            "Optimizing itinerary..."
-        ):
-
-            try:
-
-                response = requests.post(
-
-                    BACKEND_URL,
-
-                    json=payload
-                )
-
-                if response.status_code != 200:
-
-                    st.error(
-                        "Backend error occurred"
-                    )
-
-                else:
-
-                    data = response.json()
-
-                    st.session_state.trip_data = data
-
-                    itinerary = data.get(
-                        "itinerary",
-                        {}
-                    )
-
-                    selected_flights = itinerary.get(
-                        "selected_flights",
-                        []
-                    )
-
-                    selected_hotels = itinerary.get(
-                        "selected_hotels",
-                        []
-                    )
-
-                    assistant_message = f"""
-I found the best itinerary for your business trip.
-
-✔ {len(selected_flights)} optimized flights selected
-
-✔ {len(selected_hotels)} business hotels selected
-
-✔ Total estimated cost: ₹{itinerary.get('total_trip_cost', 0)}
-
-The itinerary has been optimized based on:
-• timing preferences
-• policy compliance
-• office proximity
-• business convenience
-"""
-
-                    st.session_state.messages.append({
-
-                        "role": "assistant",
-
-                        "content": assistant_message
-                    })
-
-                    st.rerun()
-
-            except Exception as e:
-
-                st.error(str(e))
-
-# =====================================
-# RIGHT PANEL
-# =====================================
-
-with right_col:
-
-    data = st.session_state.trip_data
-
-    if not data:
-
-        st.info(
-            "No itinerary generated yet."
-        )
-
-    else:
-
-        itinerary = data.get(
-            "itinerary",
-            {}
-        )
-
-        policy = data.get(
-            "policy",
-            {}
-        )
-
-        approval = data.get(
-            "approval",
-            {}
-        )
-
-        transports = data.get(
-            "transports",
-            []
-        )
-
-        calendar_analysis = data.get(
-            "calendar_analysis",
-            {}
-        )
-
-        selected_flights = itinerary.get(
-            "selected_flights",
-            []
-        )
-
-        selected_hotels = itinerary.get(
-            "selected_hotels",
-            []
-        )
-
-        total_cost = itinerary.get(
-            "total_trip_cost",
-            0
-        )
-
-        # =====================================
-        # HEADER
-        # =====================================
-
-        trip_route = " → ".join([
-
-            flight.get("source", "")
-
-            for flight in selected_flights
-        ])
-
-        if selected_flights:
-
-            trip_route += (
-                " → "
-                + selected_flights[-1].get(
-                    "destination",
-                    ""
-                )
-            )
-
-        st.markdown(
-
-            f"""
-            <div class='trip-header'>
-
-            <h1>
-            Enterprise Business Trip
-            </h1>
-
-            <p>
-            📍 {trip_route}
-            </p>
-
-            <p>
-            ✈ {len(selected_flights)} Flights
-            •
-            🏨 {len(selected_hotels)} Hotels
-            </p>
-
-            <div class='trip-cost'>
-            ₹ {total_cost}
-            </div>
-
-            </div>
-            """,
-
-            unsafe_allow_html=True
-        )
-
-        # =====================================
-        # STATUS
-        # =====================================
-
-        compliant = policy.get(
-            "compliant",
-            False
-        )
-
-        status_html = ""
-
-        if compliant:
-
-            status_html += """
-
-            <span class='chip green-chip'>
-            Policy Compliant
-            </span>
-
-            """
-
-        else:
-
-            status_html += """
-
-            <span class='chip red-chip'>
-            Policy Violations
-            </span>
-
-            """
-
-        if approval.get(
-            "approval_required"
-        ):
-
-            status_html += """
-
-            <span class='chip orange-chip'>
-            Approval Required
-            </span>
-
-            """
-
-        st.markdown(
-            status_html,
-            unsafe_allow_html=True
-        )
-
-        st.markdown("<br>",
-                    unsafe_allow_html=True)
-
-        # =====================================
-        # TIMELINE
-        # =====================================
-
-        st.subheader(
-            "Trip Timeline"
-        )
-
-        for index in range(
-            len(selected_flights)
-        ):
-
-            flight = selected_flights[index]
-
-            hotel = None
-
-            if index < len(selected_hotels):
-
-                hotel = selected_hotels[index]
-
-            st.markdown(
-
-                f"""
-                <div class='timeline-card'>
-
-                <div class='timeline-date'>
-                Flight {index + 1}
-                </div>
-
-                <div class='timeline-title'>
-                ✈ {flight.get('source')}
-                →
-                {flight.get('destination')}
-                </div>
-
-                <div class='timeline-sub'>
-                {flight.get('airline')}
-                •
-                Flight ID:
-                {flight.get('flight_id')}
-                </div>
-
-                <div class='timeline-sub'>
-                Departure:
-                {flight.get('departure_time')}
-                </div>
-
-                <div class='timeline-sub'>
-                Arrival:
-                {flight.get('arrival_time')}
-                </div>
-
-                <div class='timeline-sub'>
-                Stops:
-                {flight.get('stops')}
-                </div>
-
-                <div class='price'>
-                ₹ {flight.get('price')}
-                </div>
-
-                </div>
-                """,
-
-                unsafe_allow_html=True
-            )
-
-            if hotel:
-
-                st.markdown(
-
-                    f"""
-                    <div class='timeline-card'>
-
-                    <div class='timeline-title'>
-                    🏨 {hotel.get('hotel_name')}
-                    </div>
-
-                    <div class='timeline-sub'>
-                    City:
-                    {hotel.get('city')}
-                    </div>
-
-                    <div class='timeline-sub'>
-                    Area:
-                    {hotel.get('location_area')}
-                    </div>
-
-                    <div class='timeline-sub'>
-                    Rating:
-                    ⭐ {hotel.get('rating')}
-                    </div>
-
-                    <div class='timeline-sub'>
-                    Hotel ID:
-                    {hotel.get('hotel_id')}
-                    </div>
-
-                    <div class='price'>
-                    ₹ {hotel.get('price_per_night')}
-                    / night
-                    </div>
-
-                    </div>
-                    """,
-
-                    unsafe_allow_html=True
-                )
-
-        # =====================================
-        # COST SUMMARY
-        # =====================================
-
-        flight_cost = sum([
-
-            f.get("price", 0)
-
-            for f in selected_flights
-        ])
-
-        hotel_cost = sum([
-
-            h.get("price_per_night", 0)
-
-            for h in selected_hotels
-        ])
-
-        transport_cost = sum([
-
-            t.get(
-                "estimated_cost",
-                0
-            )
-
-            for t in transports
-        ])
-
-        st.markdown(
-
-            f"""
-            <div class='summary-card'>
-
-            <div class='summary-title'>
-            Cost Breakdown
-            </div>
-
-            <div class='summary-row'>
-            <span>Flights</span>
-            <span>₹ {flight_cost}</span>
-            </div>
-
-            <div class='summary-row'>
-            <span>Hotels</span>
-            <span>₹ {hotel_cost}</span>
-            </div>
-
-            <div class='summary-row'>
-            <span>Transport</span>
-            <span>₹ {transport_cost}</span>
-            </div>
-
-            <hr>
-
-            <div class='summary-row'>
-            <strong>Total</strong>
-            <strong>₹ {total_cost}</strong>
-            </div>
-
-            </div>
-            """,
-
-            unsafe_allow_html=True
-        )
-
-        # =====================================
-        # POLICY WARNINGS
-        # =====================================
-
-        violations = policy.get(
-            "violations",
-            []
-        )
-
-        if violations:
-
-            st.subheader(
-                "Policy Analysis"
-            )
-
-            for violation in violations:
-
-                st.markdown(
-
-                    f"""
-                    <div class='policy-warning'>
-                    {violation.get('description')}
-                    </div>
-                    """,
-
-                    unsafe_allow_html=True
-                )
-
-        # =====================================
-        # APPROVAL
-        # =====================================
-
-        st.subheader(
-            "Approval Workflow"
-        )
-
-        st.markdown(
-
-            f"""
-            <div class='summary-card'>
-
-            <div class='summary-row'>
-            <span>Approval Required</span>
-            <strong>
-            {approval.get('approval_required')}
-            </strong>
-            </div>
-
-            <div class='summary-row'>
-            <span>Approval Level</span>
-            <strong>
-            {approval.get('approval_level')}
-            </strong>
-            </div>
-
-            <div class='summary-row'>
-            <span>Reason</span>
-            <strong>
-            {approval.get('reason')}
-            </strong>
-            </div>
-
-            </div>
-            """,
-
-            unsafe_allow_html=True
-        )import streamlit as st
-import requests
-from datetime import datetime
-
-# =====================================
-# PAGE CONFIG
-# =====================================
-
-st.set_page_config(
-
-    page_title="Enterprise AI Travel Copilot",
-
-    layout="wide",
-
-    initial_sidebar_state="collapsed"
-)
-
-# =====================================
-# CUSTOM CSS
-# =====================================
-
-st.markdown("""
-
-<style>
-
-html, body, [class*="css"]  {
-
-    font-family: 'Segoe UI', sans-serif;
-
-    background-color: #f4f7fb;
-}
-
-/* =========================
-   HEADER
-========================= */
-
-.main-title {
-
-    font-size: 34px;
-
-    font-weight: 700;
-
-    color: #111827;
-
-    margin-bottom: 5px;
-}
-
-.sub-title {
-
-    color: #6b7280;
-
-    margin-bottom: 25px;
-}
-
-/* =========================
-   CHAT
-========================= */
-
-.user-message {
-
-    background: linear-gradient(
-        135deg,
-        #2563eb,
-        #1d4ed8
-    );
-
-    color: white;
-
-    padding: 14px;
-
-    border-radius: 16px;
-
-    margin-bottom: 12px;
-
-    margin-left: 40px;
-
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.12);
-}
-
-.assistant-message {
-
-    background: white;
-
-    padding: 14px;
-
-    border-radius: 16px;
-
-    margin-bottom: 12px;
-
-    margin-right: 40px;
-
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
-}
-
-/* =========================
-   TRIP HEADER
-========================= */
-
-.trip-header {
-
-    background: linear-gradient(
-        135deg,
-        #111827,
-        #1f2937
-    );
-
-    color: white;
-
-    padding: 28px;
-
-    border-radius: 22px;
-
-    margin-bottom: 22px;
-
-    box-shadow: 0px 6px 18px rgba(0,0,0,0.18);
-}
-
-.trip-cost {
-
-    font-size: 38px;
-
-    font-weight: bold;
-
-    color: #34d399;
-}
-
-/* =========================
-   TIMELINE
-========================= */
-
-.timeline-card {
-
-    background: white;
-
-    padding: 22px;
-
-    border-radius: 20px;
-
-    margin-bottom: 18px;
-
-    border-left: 6px solid #2563eb;
-
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
-}
-
-.timeline-date {
-
-    font-size: 18px;
-
-    font-weight: bold;
-
-    color: #2563eb;
-
-    margin-bottom: 12px;
-}
-
-.timeline-title {
-
-    font-size: 22px;
-
-    font-weight: bold;
-
-    color: #111827;
-
-    margin-bottom: 10px;
-}
-
-.timeline-sub {
-
-    color: #6b7280;
-
-    margin-bottom: 8px;
-}
-
-.price {
-
-    font-size: 22px;
-
-    font-weight: bold;
-
-    color: #059669;
-}
-
-/* =========================
-   STATUS CHIPS
-========================= */
-
-.chip {
-
-    display: inline-block;
-
-    padding: 8px 14px;
-
-    border-radius: 999px;
-
-    margin-right: 8px;
-
-    font-size: 13px;
-
-    font-weight: 600;
-}
-
-.green-chip {
-
-    background: #dcfce7;
-
-    color: #166534;
-}
-
-.orange-chip {
-
-    background: #fed7aa;
-
-    color: #9a3412;
-}
-
-.red-chip {
-
-    background: #fee2e2;
-
-    color: #991b1b;
-}
-
-/* =========================
-   COST SUMMARY
-========================= */
-
-.summary-card {
-
-    background: white;
-
-    padding: 22px;
-
-    border-radius: 20px;
-
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
-
-    margin-bottom: 18px;
-}
-
-.summary-title {
-
-    font-size: 20px;
-
-    font-weight: bold;
-
-    margin-bottom: 14px;
-}
-
-.summary-row {
-
-    display: flex;
-
-    justify-content: space-between;
-
-    margin-bottom: 10px;
-}
-
-/* =========================
-   POLICY
-========================= */
-
-.policy-warning {
-
-    background: #fee2e2;
-
-    color: #991b1b;
-
-    padding: 12px;
-
-    border-radius: 12px;
-
-    margin-top: 10px;
-}
-
-</style>
-
-""", unsafe_allow_html=True)
-
-# =====================================
-# SESSION STATE
-# =====================================
-
-if "messages" not in st.session_state:
-
-    st.session_state.messages = []
-
-if "trip_data" not in st.session_state:
-
-    st.session_state.trip_data = None
-
-# =====================================
-# API
-# =====================================
-
-BACKEND_URL = (
-    "http://127.0.0.1:8000/frontend-plan-trip"
-)
-
-# =====================================
-# LAYOUT
-# =====================================
-
-left_col, right_col = st.columns([1, 1.6])
-
-# =====================================
-# LEFT PANEL
-# =====================================
-
-with left_col:
-
-    st.markdown(
-
-        """
-        <div class='main-title'>
-        Enterprise AI Travel Copilot
-        </div>
-
-        <div class='sub-title'>
-        Intelligent business trip orchestration
-        </div>
-        """,
-
-        unsafe_allow_html=True
-    )
-
-    # =========================
-    # CHAT HISTORY
-    # =========================
-
-    for msg in st.session_state.messages:
-
-        if msg["role"] == "user":
-
-            st.markdown(
-
-                f"""
-                <div class='user-message'>
-                {msg['content']}
-                </div>
-                """,
-
-                unsafe_allow_html=True
-            )
-
-        else:
-
-            st.markdown(
-
-                f"""
-                <div class='assistant-message'>
-                {msg['content']}
-                </div>
-                """,
-
-                unsafe_allow_html=True
-            )
-
-    # =========================
-    # USER INPUT
-    # =========================
-
-    user_input = st.chat_input(
-        "Describe your business trip..."
-    )
-
-    employee_id = st.selectbox(
-
-        "Employee",
-
-        [
-            "EMP001",
-            "EMP002",
-            "EMP003"
-        ]
-    )
-
-    # =========================
-    # SEND
-    # =========================
-
-    if user_input:
-
-        st.session_state.messages.append({
-
-            "role": "user",
-
-            "content": user_input
-        })
-
-        payload = {
-
-            "user_input": user_input,
-
-            "employee_id": employee_id
-        }
-
-        with st.spinner(
-            "Optimizing itinerary..."
-        ):
-
-            try:
-
-                response = requests.post(
-
-                    BACKEND_URL,
-
-                    json=payload
-                )
-
-                if response.status_code != 200:
-
-                    st.error(
-                        "Backend error occurred"
-                    )
-
-                else:
-
-                    data = response.json()
-
-                    st.session_state.trip_data = data
-
-                    itinerary = data.get(
-                        "itinerary",
-                        {}
-                    )
-
-                    selected_flights = itinerary.get(
-                        "selected_flights",
-                        []
-                    )
-
-                    selected_hotels = itinerary.get(
-                        "selected_hotels",
-                        []
-                    )
-
-                    assistant_message = f"""
-I found the best itinerary for your business trip.
-
-✔ {len(selected_flights)} optimized flights selected
-
-✔ {len(selected_hotels)} business hotels selected
-
-✔ Total estimated cost: ₹{itinerary.get('total_trip_cost', 0)}
-
-The itinerary has been optimized based on:
-• timing preferences
-• policy compliance
-• office proximity
-• business convenience
-"""
-
-                    st.session_state.messages.append({
-
-                        "role": "assistant",
-
-                        "content": assistant_message
-                    })
-
-                    st.rerun()
-
-            except Exception as e:
-
-                st.error(str(e))
-
-# =====================================
-# RIGHT PANEL
-# =====================================
-
-with right_col:
-
-    data = st.session_state.trip_data
-
-    if not data:
-
-        st.info(
-            "No itinerary generated yet."
-        )
-
-    else:
-
-        itinerary = data.get(
-            "itinerary",
-            {}
-        )
-
-        policy = data.get(
-            "policy",
-            {}
-        )
-
-        approval = data.get(
-            "approval",
-            {}
-        )
-
-        transports = data.get(
-            "transports",
-            []
-        )
-
-        calendar_analysis = data.get(
-            "calendar_analysis",
-            {}
-        )
-
-        selected_flights = itinerary.get(
-            "selected_flights",
-            []
-        )
-
-        selected_hotels = itinerary.get(
-            "selected_hotels",
-            []
-        )
-
-        total_cost = itinerary.get(
-            "total_trip_cost",
-            0
-        )
-
-        # =====================================
-        # HEADER
-        # =====================================
-
-        trip_route = " → ".join([
-
-            flight.get("source", "")
-
-            for flight in selected_flights
-        ])
-
-        if selected_flights:
-
-            trip_route += (
-                " → "
-                + selected_flights[-1].get(
-                    "destination",
-                    ""
-                )
-            )
-
-        st.markdown(
-
-            f"""
-            <div class='trip-header'>
-
-            <h1>
-            Enterprise Business Trip
-            </h1>
-
-            <p>
-            📍 {trip_route}
-            </p>
-
-            <p>
-            ✈ {len(selected_flights)} Flights
-            •
-            🏨 {len(selected_hotels)} Hotels
-            </p>
-
-            <div class='trip-cost'>
-            ₹ {total_cost}
-            </div>
-
-            </div>
-            """,
-
-            unsafe_allow_html=True
-        )
-
-        # =====================================
-        # STATUS
-        # =====================================
-
-        compliant = policy.get(
-            "compliant",
-            False
-        )
-
-        status_html = ""
-
-        if compliant:
-
-            status_html += """
-
-            <span class='chip green-chip'>
-            Policy Compliant
-            </span>
-
-            """
-
-        else:
-
-            status_html += """
-
-            <span class='chip red-chip'>
-            Policy Violations
-            </span>
-
-            """
-
-        if approval.get(
-            "approval_required"
-        ):
-
-            status_html += """
-
-            <span class='chip orange-chip'>
-            Approval Required
-            </span>
-
-            """
-
-        st.markdown(
-            status_html,
-            unsafe_allow_html=True
-        )
-
-        st.markdown("<br>",
-                    unsafe_allow_html=True)
-
-        # =====================================
-        # TIMELINE
-        # =====================================
-
-        st.subheader(
-            "Trip Timeline"
-        )
-
-        for index in range(
-            len(selected_flights)
-        ):
-
-            flight = selected_flights[index]
-
-            hotel = None
-
-            if index < len(selected_hotels):
-
-                hotel = selected_hotels[index]
-
-            st.markdown(
-
-                f"""
-                <div class='timeline-card'>
-
-                <div class='timeline-date'>
-                Flight {index + 1}
-                </div>
-
-                <div class='timeline-title'>
-                ✈ {flight.get('source')}
-                →
-                {flight.get('destination')}
-                </div>
-
-                <div class='timeline-sub'>
-                {flight.get('airline')}
-                •
-                Flight ID:
-                {flight.get('flight_id')}
-                </div>
-
-                <div class='timeline-sub'>
-                Departure:
-                {flight.get('departure_time')}
-                </div>
-
-                <div class='timeline-sub'>
-                Arrival:
-                {flight.get('arrival_time')}
-                </div>
-
-                <div class='timeline-sub'>
-                Stops:
-                {flight.get('stops')}
-                </div>
-
-                <div class='price'>
-                ₹ {flight.get('price')}
-                </div>
-
-                </div>
-                """,
-
-                unsafe_allow_html=True
-            )
-
-            if hotel:
-
-                st.markdown(
-
-                    f"""
-                    <div class='timeline-card'>
-
-                    <div class='timeline-title'>
-                    🏨 {hotel.get('hotel_name')}
-                    </div>
-
-                    <div class='timeline-sub'>
-                    City:
-                    {hotel.get('city')}
-                    </div>
-
-                    <div class='timeline-sub'>
-                    Area:
-                    {hotel.get('location_area')}
-                    </div>
-
-                    <div class='timeline-sub'>
-                    Rating:
-                    ⭐ {hotel.get('rating')}
-                    </div>
-
-                    <div class='timeline-sub'>
-                    Hotel ID:
-                    {hotel.get('hotel_id')}
-                    </div>
-
-                    <div class='price'>
-                    ₹ {hotel.get('price_per_night')}
-                    / night
-                    </div>
-
-                    </div>
-                    """,
-
-                    unsafe_allow_html=True
-                )
-
-        # =====================================
-        # COST SUMMARY
-        # =====================================
-
-        flight_cost = sum([
-
-            f.get("price", 0)
-
-            for f in selected_flights
-        ])
-
-        hotel_cost = sum([
-
-            h.get("price_per_night", 0)
-
-            for h in selected_hotels
-        ])
-
-        transport_cost = sum([
-
-            t.get(
-                "estimated_cost",
-                0
-            )
-
-            for t in transports
-        ])
-
-        st.markdown(
-
-            f"""
-            <div class='summary-card'>
-
-            <div class='summary-title'>
-            Cost Breakdown
-            </div>
-
-            <div class='summary-row'>
-            <span>Flights</span>
-            <span>₹ {flight_cost}</span>
-            </div>
-
-            <div class='summary-row'>
-            <span>Hotels</span>
-            <span>₹ {hotel_cost}</span>
-            </div>
-
-            <div class='summary-row'>
-            <span>Transport</span>
-            <span>₹ {transport_cost}</span>
-            </div>
-
-            <hr>
-
-            <div class='summary-row'>
-            <strong>Total</strong>
-            <strong>₹ {total_cost}</strong>
-            </div>
-
-            </div>
-            """,
-
-            unsafe_allow_html=True
-        )
-
-        # =====================================
-        # POLICY WARNINGS
-        # =====================================
-
-        violations = policy.get(
-            "violations",
-            []
-        )
-
-        if violations:
-
-            st.subheader(
-                "Policy Analysis"
-            )
-
-            for violation in violations:
-
-                st.markdown(
-
-                    f"""
-                    <div class='policy-warning'>
-                    {violation.get('description')}
-                    </div>
-                    """,
-
-                    unsafe_allow_html=True
-                )
-
-        # =====================================
-        # APPROVAL
-        # =====================================
-
-        st.subheader(
-            "Approval Workflow"
-        )
-
-        st.markdown(
-
-            f"""
-            <div class='summary-card'>
-
-            <div class='summary-row'>
-            <span>Approval Required</span>
-            <strong>
-            {approval.get('approval_required')}
-            </strong>
-            </div>
-
-            <div class='summary-row'>
-            <span>Approval Level</span>
-            <strong>
-            {approval.get('approval_level')}
-            </strong>
-            </div>
-
-            <div class='summary-row'>
-            <span>Reason</span>
-            <strong>
-            {approval.get('reason')}
-            </strong>
-            </div>
-
-            </div>
-            """,
-
-            unsafe_allow_html=True
-        )import streamlit as st
-import requests
-from datetime import datetime
-
-# =====================================
-# PAGE CONFIG
-# =====================================
-
-st.set_page_config(
-
-    page_title="Enterprise AI Travel Copilot",
-
-    layout="wide",
-
-    initial_sidebar_state="collapsed"
-)
-
-# =====================================
-# CUSTOM CSS
-# =====================================
-
-st.markdown("""
-
-<style>
-
-html, body, [class*="css"]  {
-
-    font-family: 'Segoe UI', sans-serif;
-
-    background-color: #f4f7fb;
-}
-
-/* =========================
-   HEADER
-========================= */
-
-.main-title {
-
-    font-size: 34px;
-
-    font-weight: 700;
-
-    color: #111827;
-
-    margin-bottom: 5px;
-}
-
-.sub-title {
-
-    color: #6b7280;
-
-    margin-bottom: 25px;
-}
-
-/* =========================
-   CHAT
-========================= */
-
-.user-message {
-
-    background: linear-gradient(
-        135deg,
-        #2563eb,
-        #1d4ed8
-    );
-
-    color: white;
-
-    padding: 14px;
-
-    border-radius: 16px;
-
-    margin-bottom: 12px;
-
-    margin-left: 40px;
-
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.12);
-}
-
-.assistant-message {
-
-    background: white;
-
-    padding: 14px;
-
-    border-radius: 16px;
-
-    margin-bottom: 12px;
-
-    margin-right: 40px;
-
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
-}
-
-/* =========================
-   TRIP HEADER
-========================= */
-
-.trip-header {
-
-    background: linear-gradient(
-        135deg,
-        #111827,
-        #1f2937
-    );
-
-    color: white;
-
-    padding: 28px;
-
-    border-radius: 22px;
-
-    margin-bottom: 22px;
-
-    box-shadow: 0px 6px 18px rgba(0,0,0,0.18);
-}
-
-.trip-cost {
-
-    font-size: 38px;
-
-    font-weight: bold;
-
-    color: #34d399;
-}
-
-/* =========================
-   TIMELINE
-========================= */
-
-.timeline-card {
-
-    background: white;
-
-    padding: 22px;
-
-    border-radius: 20px;
-
-    margin-bottom: 18px;
-
-    border-left: 6px solid #2563eb;
-
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
-}
-
-.timeline-date {
-
-    font-size: 18px;
-
-    font-weight: bold;
-
-    color: #2563eb;
-
-    margin-bottom: 12px;
-}
-
-.timeline-title {
-
-    font-size: 22px;
-
-    font-weight: bold;
-
-    color: #111827;
-
-    margin-bottom: 10px;
-}
-
-.timeline-sub {
-
-    color: #6b7280;
-
-    margin-bottom: 8px;
-}
-
-.price {
-
-    font-size: 22px;
-
-    font-weight: bold;
-
-    color: #059669;
-}
-
-/* =========================
-   STATUS CHIPS
-========================= */
-
-.chip {
-
-    display: inline-block;
-
-    padding: 8px 14px;
-
-    border-radius: 999px;
-
-    margin-right: 8px;
-
-    font-size: 13px;
-
-    font-weight: 600;
-}
-
-.green-chip {
-
-    background: #dcfce7;
-
-    color: #166534;
-}
-
-.orange-chip {
-
-    background: #fed7aa;
-
-    color: #9a3412;
-}
-
-.red-chip {
-
-    background: #fee2e2;
-
-    color: #991b1b;
-}
-
-/* =========================
-   COST SUMMARY
-========================= */
-
-.summary-card {
-
-    background: white;
-
-    padding: 22px;
-
-    border-radius: 20px;
-
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
-
-    margin-bottom: 18px;
-}
-
-.summary-title {
-
-    font-size: 20px;
-
-    font-weight: bold;
-
-    margin-bottom: 14px;
-}
-
-.summary-row {
-
-    display: flex;
-
-    justify-content: space-between;
-
-    margin-bottom: 10px;
-}
-
-/* =========================
-   POLICY
-========================= */
-
-.policy-warning {
-
-    background: #fee2e2;
-
-    color: #991b1b;
-
-    padding: 12px;
-
-    border-radius: 12px;
-
-    margin-top: 10px;
-}
-
-</style>
-
-""", unsafe_allow_html=True)
-
-# =====================================
-# SESSION STATE
-# =====================================
-
-if "messages" not in st.session_state:
-
-    st.session_state.messages = []
-
-if "trip_data" not in st.session_state:
-
-    st.session_state.trip_data = None
-
-# =====================================
-# API
-# =====================================
-
-BACKEND_URL = (
-    "http://127.0.0.1:8000/frontend-plan-trip"
-)
-
-# =====================================
-# LAYOUT
-# =====================================
-
-left_col, right_col = st.columns([1, 1.6])
-
-# =====================================
-# LEFT PANEL
-# =====================================
-
-with left_col:
-
-    st.markdown(
-
-        """
-        <div class='main-title'>
-        Enterprise AI Travel Copilot
-        </div>
-
-        <div class='sub-title'>
-        Intelligent business trip orchestration
-        </div>
-        """,
-
-        unsafe_allow_html=True
-    )
-
-    # =========================
-    # CHAT HISTORY
-    # =========================
-
-    for msg in st.session_state.messages:
-
-        if msg["role"] == "user":
-
-            st.markdown(
-
-                f"""
-                <div class='user-message'>
-                {msg['content']}
-                </div>
-                """,
-
-                unsafe_allow_html=True
-            )
-
-        else:
-
-            st.markdown(
-
-                f"""
-                <div class='assistant-message'>
-                {msg['content']}
-                </div>
-                """,
-
-                unsafe_allow_html=True
-            )
-
-    # =========================
-    # USER INPUT
-    # =========================
-
-    user_input = st.chat_input(
-        "Describe your business trip..."
-    )
-
-    employee_id = st.selectbox(
-
-        "Employee",
-
-        [
-            "EMP001",
-            "EMP002",
-            "EMP003"
-        ]
-    )
-
-    # =========================
-    # SEND
-    # =========================
-
-    if user_input:
-
-        st.session_state.messages.append({
-
-            "role": "user",
-
-            "content": user_input
-        })
-
-        payload = {
-
-            "user_input": user_input,
-
-            "employee_id": employee_id
-        }
-
-        with st.spinner(
-            "Optimizing itinerary..."
-        ):
-
-            try:
-
-                response = requests.post(
-
-                    BACKEND_URL,
-
-                    json=payload
-                )
-
-                if response.status_code != 200:
-
-                    st.error(
-                        "Backend error occurred"
-                    )
-
-                else:
-
-                    data = response.json()
-
-                    st.session_state.trip_data = data
-
-                    itinerary = data.get(
-                        "itinerary",
-                        {}
-                    )
-
-                    selected_flights = itinerary.get(
-                        "selected_flights",
-                        []
-                    )
-
-                    selected_hotels = itinerary.get(
-                        "selected_hotels",
-                        []
-                    )
-
-                    assistant_message = f"""
-I found the best itinerary for your business trip.
-
-✔ {len(selected_flights)} optimized flights selected
-
-✔ {len(selected_hotels)} business hotels selected
-
-✔ Total estimated cost: ₹{itinerary.get('total_trip_cost', 0)}
-
-The itinerary has been optimized based on:
-• timing preferences
-• policy compliance
-• office proximity
-• business convenience
-"""
-
-                    st.session_state.messages.append({
-
-                        "role": "assistant",
-
-                        "content": assistant_message
-                    })
-
-                    st.rerun()
-
-            except Exception as e:
-
-                st.error(str(e))
-
-# =====================================
-# RIGHT PANEL
-# =====================================
-
-with right_col:
-
-    data = st.session_state.trip_data
-
-    if not data:
-
-        st.info(
-            "No itinerary generated yet."
-        )
-
-    else:
-
-        itinerary = data.get(
-            "itinerary",
-            {}
-        )
-
-        policy = data.get(
-            "policy",
-            {}
-        )
-
-        approval = data.get(
-            "approval",
-            {}
-        )
-
-        transports = data.get(
-            "transports",
-            []
-        )
-
-        calendar_analysis = data.get(
-            "calendar_analysis",
-            {}
-        )
-
-        selected_flights = itinerary.get(
-            "selected_flights",
-            []
-        )
-
-        selected_hotels = itinerary.get(
-            "selected_hotels",
-            []
-        )
-
-        total_cost = itinerary.get(
-            "total_trip_cost",
-            0
-        )
-
-        # =====================================
-        # HEADER
-        # =====================================
-
-        trip_route = " → ".join([
-
-            flight.get("source", "")
-
-            for flight in selected_flights
-        ])
-
-        if selected_flights:
-
-            trip_route += (
-                " → "
-                + selected_flights[-1].get(
-                    "destination",
-                    ""
-                )
-            )
-
-        st.markdown(
-
-            f"""
-            <div class='trip-header'>
-
-            <h1>
-            Enterprise Business Trip
-            </h1>
-
-            <p>
-            📍 {trip_route}
-            </p>
-
-            <p>
-            ✈ {len(selected_flights)} Flights
-            •
-            🏨 {len(selected_hotels)} Hotels
-            </p>
-
-            <div class='trip-cost'>
-            ₹ {total_cost}
-            </div>
-
-            </div>
-            """,
-
-            unsafe_allow_html=True
-        )
-
-        # =====================================
-        # STATUS
-        # =====================================
-
-        compliant = policy.get(
-            "compliant",
-            False
-        )
-
-        status_html = ""
-
-        if compliant:
-
-            status_html += """
-
-            <span class='chip green-chip'>
-            Policy Compliant
-            </span>
-
-            """
-
-        else:
-
-            status_html += """
-
-            <span class='chip red-chip'>
-            Policy Violations
-            </span>
-
-            """
-
-        if approval.get(
-            "approval_required"
-        ):
-
-            status_html += """
-
-            <span class='chip orange-chip'>
-            Approval Required
-            </span>
-
-            """
-
-        st.markdown(
-            status_html,
-            unsafe_allow_html=True
-        )
-
-        st.markdown("<br>",
-                    unsafe_allow_html=True)
-
-        # =====================================
-        # TIMELINE
-        # =====================================
-
-        st.subheader(
-            "Trip Timeline"
-        )
-
-        for index in range(
-            len(selected_flights)
-        ):
-
-            flight = selected_flights[index]
-
-            hotel = None
-
-            if index < len(selected_hotels):
-
-                hotel = selected_hotels[index]
-
-            st.markdown(
-
-                f"""
-                <div class='timeline-card'>
-
-                <div class='timeline-date'>
-                Flight {index + 1}
-                </div>
-
-                <div class='timeline-title'>
-                ✈ {flight.get('source')}
-                →
-                {flight.get('destination')}
-                </div>
-
-                <div class='timeline-sub'>
-                {flight.get('airline')}
-                •
-                Flight ID:
-                {flight.get('flight_id')}
-                </div>
-
-                <div class='timeline-sub'>
-                Departure:
-                {flight.get('departure_time')}
-                </div>
-
-                <div class='timeline-sub'>
-                Arrival:
-                {flight.get('arrival_time')}
-                </div>
-
-                <div class='timeline-sub'>
-                Stops:
-                {flight.get('stops')}
-                </div>
-
-                <div class='price'>
-                ₹ {flight.get('price')}
-                </div>
-
-                </div>
-                """,
-
-                unsafe_allow_html=True
-            )
-
-            if hotel:
-
-                st.markdown(
-
-                    f"""
-                    <div class='timeline-card'>
-
-                    <div class='timeline-title'>
-                    🏨 {hotel.get('hotel_name')}
-                    </div>
-
-                    <div class='timeline-sub'>
-                    City:
-                    {hotel.get('city')}
-                    </div>
-
-                    <div class='timeline-sub'>
-                    Area:
-                    {hotel.get('location_area')}
-                    </div>
-
-                    <div class='timeline-sub'>
-                    Rating:
-                    ⭐ {hotel.get('rating')}
-                    </div>
-
-                    <div class='timeline-sub'>
-                    Hotel ID:
-                    {hotel.get('hotel_id')}
-                    </div>
-
-                    <div class='price'>
-                    ₹ {hotel.get('price_per_night')}
-                    / night
-                    </div>
-
-                    </div>
-                    """,
-
-                    unsafe_allow_html=True
-                )
-
-        # =====================================
-        # COST SUMMARY
-        # =====================================
-
-        flight_cost = sum([
-
-            f.get("price", 0)
-
-            for f in selected_flights
-        ])
-
-        hotel_cost = sum([
-
-            h.get("price_per_night", 0)
-
-            for h in selected_hotels
-        ])
-
-        transport_cost = sum([
-
-            t.get(
-                "estimated_cost",
-                0
-            )
-
-            for t in transports
-        ])
-
-        st.markdown(
-
-            f"""
-            <div class='summary-card'>
-
-            <div class='summary-title'>
-            Cost Breakdown
-            </div>
-
-            <div class='summary-row'>
-            <span>Flights</span>
-            <span>₹ {flight_cost}</span>
-            </div>
-
-            <div class='summary-row'>
-            <span>Hotels</span>
-            <span>₹ {hotel_cost}</span>
-            </div>
-
-            <div class='summary-row'>
-            <span>Transport</span>
-            <span>₹ {transport_cost}</span>
-            </div>
-
-            <hr>
-
-            <div class='summary-row'>
-            <strong>Total</strong>
-            <strong>₹ {total_cost}</strong>
-            </div>
-
-            </div>
-            """,
-
-            unsafe_allow_html=True
-        )
-
-        # =====================================
-        # POLICY WARNINGS
-        # =====================================
-
-        violations = policy.get(
-            "violations",
-            []
-        )
-
-        if violations:
-
-            st.subheader(
-                "Policy Analysis"
-            )
-
-            for violation in violations:
-
-                st.markdown(
-
-                    f"""
-                    <div class='policy-warning'>
-                    {violation.get('description')}
-                    </div>
-                    """,
-
-                    unsafe_allow_html=True
-                )
-
-        # =====================================
-        # APPROVAL
-        # =====================================
-
-        st.subheader(
-            "Approval Workflow"
-        )
-
-        st.markdown(
-
-            f"""
-            <div class='summary-card'>
-
-            <div class='summary-row'>
-            <span>Approval Required</span>
-            <strong>
-            {approval.get('approval_required')}
-            </strong>
-            </div>
-
-            <div class='summary-row'>
-            <span>Approval Level</span>
-            <strong>
-            {approval.get('approval_level')}
-            </strong>
-            </div>
-
-            <div class='summary-row'>
-            <span>Reason</span>
-            <strong>
-            {approval.get('reason')}
-            </strong>
-            </div>
-
-            </div>
-            """,
-
-            unsafe_allow_html=True
-        )

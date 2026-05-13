@@ -5,12 +5,13 @@ from langchain_community.document_loaders import (
 from langchain_text_splitters import (
     RecursiveCharacterTextSplitter
 )
-from langchain_community.embeddings import (
-    HuggingFaceEmbeddings
-)
 
 from langchain_community.vectorstores import (
     Chroma
+)
+
+from app.rag.custom_embeddings import (
+    GenAIEmbeddings
 )
 
 
@@ -57,14 +58,10 @@ def ingest_policy_documents():
     )
 
     # =========================
-    # EMBEDDINGS
+    # ENTERPRISE EMBEDDINGS
     # =========================
 
-    embeddings = HuggingFaceEmbeddings(
-
-        model_name=
-        "sentence-transformers/all-MiniLM-L6-v2"
-    )
+    embeddings = GenAIEmbeddings()
 
     # =========================
     # CHROMA VECTOR STORE
@@ -81,7 +78,9 @@ def ingest_policy_documents():
 
     vectordb.persist()
 
-    print("\nPolicy RAG ingestion completed.\n")
+    print(
+        "\nPolicy RAG ingestion completed.\n"
+    )
 
 
 if __name__ == "__main__":

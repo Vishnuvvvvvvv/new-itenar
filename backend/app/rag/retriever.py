@@ -1,9 +1,9 @@
-from langchain_community.embeddings import (
-    HuggingFaceEmbeddings
-)
-
 from langchain_community.vectorstores import (
     Chroma
+)
+
+from app.rag.custom_embeddings import (
+    GenAIEmbeddings
 )
 
 
@@ -12,11 +12,7 @@ CHROMA_PATH = (
 )
 
 
-embeddings = HuggingFaceEmbeddings(
-
-    model_name=
-    "sentence-transformers/all-MiniLM-L6-v2"
-)
+embeddings = GenAIEmbeddings()
 
 
 vectordb = Chroma(
@@ -27,9 +23,7 @@ vectordb = Chroma(
 )
 
 
-def retrieve_policy(
-    query
-):
+def retrieve_policy(query):
 
     docs = vectordb.similarity_search(
 
@@ -38,12 +32,4 @@ def retrieve_policy(
         k=3
     )
 
-    context = "\n\n".join(
-
-        [
-            doc.page_content
-            for doc in docs
-        ]
-    )
-
-    return context
+    return docs
