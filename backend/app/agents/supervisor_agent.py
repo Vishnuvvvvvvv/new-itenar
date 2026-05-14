@@ -1,4 +1,5 @@
 import json
+import os
 import re
 
 from app.core.llm import llm
@@ -111,13 +112,40 @@ def supervisor_agent(
     parsed_request,
     user_input
 ):
+    if os.getenv("ENABLE_LLM_AGENTS", "false").lower() != "true":
+        return {
+            "request_type": "travel_planning",
+            "next_steps": [
+                "calendar",
+                "flight",
+                "hotel",
+                "policy",
+                "optimizer",
+                "explanation"
+            ]
+        }
 
     prompt = SUPERVISOR_PROMPT.format(
         parsed_request=parsed_request,
         user_input=user_input
     )
 
-    response = llm.invoke(prompt)
+    try:
+        response = llm.invoke(prompt)
+    except Exception as e:
+        print("\nSUPERVISOR ERROR:\n")
+        print(e)
+        return {
+            "request_type": "travel_planning",
+            "next_steps": [
+                "calendar",
+                "flight",
+                "hotel",
+                "policy",
+                "optimizer",
+                "explanation"
+            ]
+        }
 
     content = response.content
 

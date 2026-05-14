@@ -4,9 +4,11 @@ langgraph
 langchain
 langchain-community
 langchain-core
+langchain-openai
 chromadb
 pydantic
 sqlalchemy
 python-dotenv
 sentence-transformers
 pypdf
+openai

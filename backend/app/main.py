@@ -11,6 +11,12 @@ from app.api.routes.travel_routes import (
 from app.api.routes.frontend_routes import (
     router as frontend_router
 )
+from app.api.routes.auth_routes import (
+    router as auth_router
+)
+from app.api.routes.booking_routes import (
+    router as booking_router
+)
 
 app = FastAPI(
 
@@ -56,4 +62,14 @@ app.include_router(
 app.include_router(
 
     frontend_router
+)
+
+app.include_router(
+
+    auth_router
+)
+
+app.include_router(
+
+    booking_router
 )

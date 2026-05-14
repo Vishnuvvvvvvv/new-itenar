@@ -1,484 +1,89 @@
-import json
-
-from app.core.llm import (
-    llm
-)
-
-from app.utils.json_parser import (
-    extract_json
-)
+from datetime import datetime
 
 
 def calendar_agent(
-
     meetings,
     flights,
     existing_calendar
 ):
+    schedule_analysis = []
+    conflicts = []
 
-    prompt = f"""
-You are an enterprise calendar intelligence agent.
+    for meeting in meetings or []:
+        city = meeting.get("city", "")
+        flight = _flight_to_city(
+            flights,
+            city
+        )
+        arrival_time = flight.get("arrival_time", "") if flight else ""
+        meeting_time = meeting.get("time") or meeting.get("meeting_time") or ""
+        buffer_minutes = _buffer_minutes(
+            arrival_time,
+            meeting_time
+        )
+        feasible = buffer_minutes >= 90
 
-TASK:
-
-Analyze:
-
-1. Meeting feasibility
-2. Flight arrival feasibility
-3. Schedule overlaps
-4. Existing employee calendar conflicts
-5. Risky schedules
-6. Business practicality
-
-RULES:
-
-- Minimum safe buffer:
-  90 minutes before meetings
-
-- Detect:
-  - overlapping meetings
-  - impossible travel
-  - insufficient commute buffers
-  - overloaded schedules
-
-IMPORTANT:
-- Return STRICT JSON ONLY
-- DO NOT explain
-- DO NOT generate markdown
-- DO NOT generate code
-
-OUTPUT FORMAT:
-
-{{
-  "schedule_analysis": [
-    {{
-      "city": "",
-      "meeting_date": "",
-      "meeting_time": "",
-      "arrival_time": "",
-      "buffer_minutes": 0,
-      "feasible": true,
-      "risk_level": ""
-    }}
-  ],
-  "conflicts": []
-}}
-
-=========================
-NEW TRAVEL MEETINGS
-=========================
-
-{json.dumps(meetings, indent=2)}
-
-=========================
-AVAILABLE FLIGHTS
-=========================
-
-{json.dumps(flights, indent=2)}
-
-=========================
-EXISTING EMPLOYEE CALENDAR
-=========================
-
-{json.dumps(existing_calendar, indent=2)}
-"""
-
-    try:
-
-        response = llm.invoke(
-            prompt
+        schedule_analysis.append(
+            {
+                "city": city,
+                "meeting_date": meeting.get("date") or meeting.get("meeting_date") or "",
+                "meeting_time": meeting_time,
+                "arrival_time": arrival_time,
+                "buffer_minutes": max(0, buffer_minutes),
+                "feasible": feasible,
+                "risk_level": "low" if feasible else "high",
+            }
         )
 
-        content = response.content.strip()
+        if not feasible:
+            conflicts.append(
+                {
+                    "city": city,
+                    "reason": "Less than 90 minutes between arrival and meeting.",
+                }
+            )
 
-        print(
-            "\nCALENDAR AGENT RAW OUTPUT:\n"
-        )
-
-        print(content)
-
-        result = extract_json(
-            content
-        )
-
-        return result
-
-    except Exception as e:
-
-        print(
-            "\nCALENDAR AGENT ERROR:\n"
-        )
-
-        print(str(e))
-
-        return {
-
-            "schedule_analysis": [],
-
-            "conflicts": [
-                "Fallback calendar analysis used."
-            ]
-        }
-import json
-
-from app.core.llm import (
-    llm
-)
-
-from app.utils.json_parser import (
-    extract_json
-)
+    return {
+        "schedule_analysis": schedule_analysis,
+        "conflicts": conflicts,
+    }
 
 
-def calendar_agent(
-
-    meetings,
+def _flight_to_city(
     flights,
-    existing_calendar
+    city
 ):
-
-    prompt = f"""
-You are an enterprise calendar intelligence agent.
-
-TASK:
-
-Analyze:
-
-1. Meeting feasibility
-2. Flight arrival feasibility
-3. Schedule overlaps
-4. Existing employee calendar conflicts
-5. Risky schedules
-6. Business practicality
-
-RULES:
-
-- Minimum safe buffer:
-  90 minutes before meetings
-
-- Detect:
-  - overlapping meetings
-  - impossible travel
-  - insufficient commute buffers
-  - overloaded schedules
-
-IMPORTANT:
-- Return STRICT JSON ONLY
-- DO NOT explain
-- DO NOT generate markdown
-- DO NOT generate code
-
-OUTPUT FORMAT:
-
-{{
-  "schedule_analysis": [
-    {{
-      "city": "",
-      "meeting_date": "",
-      "meeting_time": "",
-      "arrival_time": "",
-      "buffer_minutes": 0,
-      "feasible": true,
-      "risk_level": ""
-    }}
-  ],
-  "conflicts": []
-}}
-
-=========================
-NEW TRAVEL MEETINGS
-=========================
-
-{json.dumps(meetings, indent=2)}
-
-=========================
-AVAILABLE FLIGHTS
-=========================
-
-{json.dumps(flights, indent=2)}
-
-=========================
-EXISTING EMPLOYEE CALENDAR
-=========================
-
-{json.dumps(existing_calendar, indent=2)}
-"""
-
-    try:
-
-        response = llm.invoke(
-            prompt
-        )
-
-        content = response.content.strip()
-
-        print(
-            "\nCALENDAR AGENT RAW OUTPUT:\n"
-        )
-
-        print(content)
-
-        result = extract_json(
-            content
-        )
-
-        return result
-
-    except Exception as e:
-
-        print(
-            "\nCALENDAR AGENT ERROR:\n"
-        )
-
-        print(str(e))
-
-        return {
-
-            "schedule_analysis": [],
-
-            "conflicts": [
-                "Fallback calendar analysis used."
-            ]
-        }
-import json
-
-from app.core.llm import (
-    llm
-)
-
-from app.utils.json_parser import (
-    extract_json
-)
+    for flight in flights or []:
+        if str(flight.get("destination", "")).lower() == str(city).lower():
+            return flight
+    return {}
 
 
-def calendar_agent(
-
-    meetings,
-    flights,
-    existing_calendar
+def _buffer_minutes(
+    arrival_time,
+    meeting_time
 ):
+    arrival = _parse_time(arrival_time)
+    meeting = _parse_time(meeting_time)
 
-    prompt = f"""
-You are an enterprise calendar intelligence agent.
+    if not arrival or not meeting:
+        return 120
 
-TASK:
-
-Analyze:
-
-1. Meeting feasibility
-2. Flight arrival feasibility
-3. Schedule overlaps
-4. Existing employee calendar conflicts
-5. Risky schedules
-6. Business practicality
-
-RULES:
-
-- Minimum safe buffer:
-  90 minutes before meetings
-
-- Detect:
-  - overlapping meetings
-  - impossible travel
-  - insufficient commute buffers
-  - overloaded schedules
-
-IMPORTANT:
-- Return STRICT JSON ONLY
-- DO NOT explain
-- DO NOT generate markdown
-- DO NOT generate code
-
-OUTPUT FORMAT:
-
-{{
-  "schedule_analysis": [
-    {{
-      "city": "",
-      "meeting_date": "",
-      "meeting_time": "",
-      "arrival_time": "",
-      "buffer_minutes": 0,
-      "feasible": true,
-      "risk_level": ""
-    }}
-  ],
-  "conflicts": []
-}}
-
-=========================
-NEW TRAVEL MEETINGS
-=========================
-
-{json.dumps(meetings, indent=2)}
-
-=========================
-AVAILABLE FLIGHTS
-=========================
-
-{json.dumps(flights, indent=2)}
-
-=========================
-EXISTING EMPLOYEE CALENDAR
-=========================
-
-{json.dumps(existing_calendar, indent=2)}
-"""
-
-    try:
-
-        response = llm.invoke(
-            prompt
-        )
-
-        content = response.content.strip()
-
-        print(
-            "\nCALENDAR AGENT RAW OUTPUT:\n"
-        )
-
-        print(content)
-
-        result = extract_json(
-            content
-        )
-
-        return result
-
-    except Exception as e:
-
-        print(
-            "\nCALENDAR AGENT ERROR:\n"
-        )
-
-        print(str(e))
-
-        return {
-
-            "schedule_analysis": [],
-
-            "conflicts": [
-                "Fallback calendar analysis used."
-            ]
-        }
-import json
-
-from app.core.llm import (
-    llm
-)
-
-from app.utils.json_parser import (
-    extract_json
-)
+    return int(
+        (meeting - arrival).total_seconds() / 60
+    )
 
 
-def calendar_agent(
-
-    meetings,
-    flights,
-    existing_calendar
+def _parse_time(
+    value
 ):
-
-    prompt = f"""
-You are an enterprise calendar intelligence agent.
-
-TASK:
-
-Analyze:
-
-1. Meeting feasibility
-2. Flight arrival feasibility
-3. Schedule overlaps
-4. Existing employee calendar conflicts
-5. Risky schedules
-6. Business practicality
-
-RULES:
-
-- Minimum safe buffer:
-  90 minutes before meetings
-
-- Detect:
-  - overlapping meetings
-  - impossible travel
-  - insufficient commute buffers
-  - overloaded schedules
-
-IMPORTANT:
-- Return STRICT JSON ONLY
-- DO NOT explain
-- DO NOT generate markdown
-- DO NOT generate code
-
-OUTPUT FORMAT:
-
-{{
-  "schedule_analysis": [
-    {{
-      "city": "",
-      "meeting_date": "",
-      "meeting_time": "",
-      "arrival_time": "",
-      "buffer_minutes": 0,
-      "feasible": true,
-      "risk_level": ""
-    }}
-  ],
-  "conflicts": []
-}}
-
-=========================
-NEW TRAVEL MEETINGS
-=========================
-
-{json.dumps(meetings, indent=2)}
-
-=========================
-AVAILABLE FLIGHTS
-=========================
-
-{json.dumps(flights, indent=2)}
-
-=========================
-EXISTING EMPLOYEE CALENDAR
-=========================
-
-{json.dumps(existing_calendar, indent=2)}
-"""
-
-    try:
-
-        response = llm.invoke(
-            prompt
-        )
-
-        content = response.content.strip()
-
-        print(
-            "\nCALENDAR AGENT RAW OUTPUT:\n"
-        )
-
-        print(content)
-
-        result = extract_json(
-            content
-        )
-
-        return result
-
-    except Exception as e:
-
-        print(
-            "\nCALENDAR AGENT ERROR:\n"
-        )
-
-        print(str(e))
-
-        return {
-
-            "schedule_analysis": [],
-
-            "conflicts": [
-                "Fallback calendar analysis used."
-            ]
-        }
+    value = str(value or "").strip().upper()
+    for fmt in ("%I:%M %p", "%I %p"):
+        try:
+            return datetime.strptime(
+                value,
+                fmt
+            )
+        except ValueError:
+            continue
+    return None

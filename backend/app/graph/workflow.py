@@ -43,6 +43,10 @@ from app.graph.nodes.transport_node import (
     transport_node
 )
 
+from app.graph.nodes.ranking_node import (
+    ranking_node
+)
+
 from app.graph.nodes.policy_node import (
     policy_node
 )
@@ -53,6 +57,10 @@ from app.graph.nodes.approval_node import (
 
 from app.graph.nodes.explanation_node import (
     explanation_node
+)
+
+from app.graph.nodes.itinerary_node import (
+    itinerary_node
 )
 
 # =========================
@@ -108,6 +116,11 @@ workflow.add_node(
 )
 
 workflow.add_node(
+    "ranking",
+    ranking_node
+)
+
+workflow.add_node(
     "policy",
     policy_node
 )
@@ -120,6 +133,11 @@ workflow.add_node(
 workflow.add_node(
     "explanation",
     explanation_node
+)
+
+workflow.add_node(
+    "itinerary",
+    itinerary_node
 )
 
 # =========================
@@ -161,16 +179,21 @@ workflow.add_edge(
 
 workflow.add_edge(
     "hotel",
-    "optimizer"
-)
-
-workflow.add_edge(
-    "optimizer",
     "transport"
 )
 
 workflow.add_edge(
     "transport",
+    "ranking"
+)
+
+workflow.add_edge(
+    "ranking",
+    "optimizer"
+)
+
+workflow.add_edge(
+    "optimizer",
     "policy"
 )
 
@@ -181,6 +204,11 @@ workflow.add_edge(
 
 workflow.add_edge(
     "approval",
+    "itinerary"
+)
+
+workflow.add_edge(
+    "itinerary",
     "explanation"
 )
 

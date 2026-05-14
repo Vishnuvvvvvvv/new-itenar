@@ -1,46 +1,4 @@
-import json
-
-from app.core.llm import (
-    llm
-)
-
-
-APPROVAL_PROMPT = """
-You are an enterprise travel approval agent.
-
-Your task is to determine whether
-a business trip requires approval.
-
-Consider:
-1. total trip cost
-2. policy violations
-3. business class usage
-4. luxury hotel usage
-5. compliance status
-6. risk level
-
-Trip Cost:
-{trip_cost}
-
-Policy Results:
-{policy_results}
-
-Selected Flight:
-{selected_flight}
-
-Selected Hotel:
-{selected_hotel}
-
-Return ONLY valid JSON.
-
-Example:
-
-{{
-    "approval_required": true,
-    "approval_level": "Manager",
-    "reason": "Trip exceeds allowed budget"
-}}
-"""
+APPROVAL_COST_THRESHOLD = 25000
 
 
 def approval_agent(
@@ -50,85 +8,64 @@ def approval_agent(
     policy_results
 ):
 
-    selected_flight = (
-        optimized_itinerary.get(
-            "selected_flight",
-            {}
-        )
+    selected_flights = optimized_itinerary.get(
+        "selected_flights",
+        []
     )
 
-    selected_hotel = (
-        optimized_itinerary.get(
-            "selected_hotel",
-            {}
-        )
+    selected_hotels = optimized_itinerary.get(
+        "selected_hotels",
+        []
     )
 
-    total_trip_cost = (
-        optimized_itinerary.get(
-            "total_trip_cost",
-            0
-        )
+    total_trip_cost = optimized_itinerary.get(
+        "total_trip_cost",
+        0
     )
 
-    prompt = (
-        APPROVAL_PROMPT.format(
+    reasons = []
+    violations = policy_results.get(
+        "violations",
+        []
+    ) or []
 
-            trip_cost=total_trip_cost,
+    if not policy_results.get("compliant", True) or violations:
+        reasons.append("Policy violations detected.")
 
-            policy_results=json.dumps(
-                policy_results,
-                indent=2
-            ),
-
-            selected_flight=json.dumps(
-                selected_flight,
-                indent=2
-            ),
-
-            selected_hotel=json.dumps(
-                selected_hotel,
-                indent=2
-            )
-        )
-    )
-
-    response = llm.invoke(
-        prompt
-    )
-
-    raw_output = (
-        response.content.strip()
-    )
-
-    print(
-        "\nAPPROVAL AGENT RAW OUTPUT:\n"
-    )
-
-    print(raw_output)
-
-    try:
-
-        parsed = json.loads(
-            raw_output
+    if total_trip_cost > APPROVAL_COST_THRESHOLD:
+        reasons.append(
+            f"Total trip cost exceeds INR {APPROVAL_COST_THRESHOLD}."
         )
 
-        return parsed
+    if any(
+        flight.get("travel_class", "").lower() == "business"
+        for flight in selected_flights
+    ):
+        reasons.append("Business class flight selected.")
 
-    except Exception as e:
+    if any(
+        hotel.get("hotel_type", "").lower() == "luxury"
+        for hotel in selected_hotels
+    ):
+        reasons.append("Luxury hotel selected.")
 
-        print(
-            "\nAPPROVAL AGENT ERROR:\n"
-        )
+    approval_required = bool(reasons)
 
-        print(str(e))
-
+    if not approval_required:
         return {
-
-            "approval_required": True,
-
-            "approval_level": "Manager",
-
-            "reason":
-            "Fallback approval used."
+            "approval_required": False,
+            "approval_level": "None",
+            "status": "not_required",
+            "approval_completed": True,
+            "reason": "Trip is within deterministic approval rules.",
+            "violations": [],
         }
+
+    return {
+        "approval_required": True,
+        "approval_level": "Manager",
+        "status": "pending",
+        "approval_completed": False,
+        "reason": " ".join(reasons),
+        "violations": violations,
+    }

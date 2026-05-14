@@ -13,6 +13,12 @@ class TravelPlannerService:
 
         initial_state = {
 
+            "session_id":
+            request_data.get(
+                "session_id",
+                ""
+            ),
+
             "user_input":
             request_data.get(
                 "user_input"
@@ -23,7 +29,19 @@ class TravelPlannerService:
                 "employee_id"
             ),
 
-            "parsed_input": {},
+            "conversation_history":
+            request_data.get(
+                "conversation_history",
+                []
+            ),
+
+            "previous_request":
+            request_data.get(
+                "previous_request",
+                {}
+            ),
+
+            "parsed_request": {},
 
             "employee_context": {},
 
@@ -35,13 +53,27 @@ class TravelPlannerService:
 
             "transport_options": [],
 
+            "ranking_results": {},
+
             "policy_results": {},
 
             "approval_workflow": {},
 
             "optimized_itinerary": {},
 
+            "itinerary_days": [],
+
             "calendar_analysis": {},
+
+            "booking_state":
+            request_data.get(
+                "booking_state",
+                {}
+            ),
+
+            "approval_prompt_pending": False,
+
+            "recommendation_warnings": [],
 
             "final_response": "",
 

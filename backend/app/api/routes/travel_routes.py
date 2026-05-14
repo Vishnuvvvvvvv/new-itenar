@@ -23,10 +23,12 @@ def plan_trip(
 ):
 
     result = (
-        TravelPlannerService
-        .generate_itinerary(
-            request.user_input,
-            request.employee_id
+        TravelPlannerService()
+        .run_trip_planner(
+            {
+                "user_input": request.user_input,
+                "employee_id": request.employee_id,
+            }
         )
     )
 

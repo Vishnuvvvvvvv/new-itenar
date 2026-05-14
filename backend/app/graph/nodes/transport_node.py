@@ -1,6 +1,9 @@
 from app.graph.state import (
     TravelState
 )
+from app.graph.agent_runtime import (
+    run_agent_step
+)
 
 from app.agents.transport_agent import (
     transport_agent
@@ -10,6 +13,11 @@ from app.agents.transport_agent import (
 def transport_node(
     state: TravelState
 ):
+    run_agent_step(
+        state,
+        "Transport Agent",
+        "Selecting local transport by coverage area, comfort, efficiency, and cost."
+    )
 
     hotels = state.get(
         "hotel_options",
@@ -34,10 +42,10 @@ def transport_node(
         "transport_options"
     ] = transports
 
-    state[
-        "execution_logs"
-    ].append(
-        "Transport agent executed successfully."
+    run_agent_step(
+        state,
+        "Transport Agent",
+        f"Selected {len(transports)} local transport recommendation(s)."
     )
 
     return state

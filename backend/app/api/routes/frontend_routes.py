@@ -3,6 +3,9 @@ from fastapi import APIRouter
 from app.services.travel_service import (
     TravelPlannerService
 )
+from app.services.session_service import (
+    session_service
+)
 
 from app.models.frontend_request import (
     FrontendTripRequest
@@ -18,51 +21,71 @@ service = TravelPlannerService()
 async def frontend_plan_trip(
     request: FrontendTripRequest
 ):
+    login_result = session_service.login(
+        request.employee_id,
+        "demo"
+    )
 
-    result = service.run_trip_planner(
-
-        request.dict()
+    result = session_service.chat(
+        login_result["session_id"],
+        request.user_input
     )
 
     return {
 
         "chat_summary":
-        result.get(
-            "final_response"
-        ),
+        result.get("assistant_message"),
 
         "itinerary":
         result.get(
-            "optimized_itinerary"
+            "itinerary"
+        ),
+
+        "itinerary_days":
+        result.get(
+            "itinerary_days",
+            []
+        ),
+
+        "rankings":
+        result.get(
+            "rankings",
+            {}
         ),
 
         "flights":
         result.get(
-            "flight_options",
+            "flights",
             []
         ),
 
         "hotels":
         result.get(
-            "hotel_options",
+            "hotels",
             []
         ),
 
         "transports":
         result.get(
-            "transport_options",
+            "transports",
             []
         ),
 
         "policy":
         result.get(
-            "policy_results",
+            "policy",
             {}
         ),
 
         "approval":
         result.get(
-            "approval_workflow",
+            "approval",
+            {}
+        ),
+
+        "booking_state":
+        result.get(
+            "booking_state",
             {}
         ),
 

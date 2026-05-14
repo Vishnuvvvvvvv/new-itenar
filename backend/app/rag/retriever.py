@@ -1,10 +1,16 @@
-from langchain_community.vectorstores import (
-    Chroma
-)
+import os
 
-from app.rag.custom_embeddings import (
-    GenAIEmbeddings
-)
+try:
+    from langchain_community.vectorstores import (
+        Chroma
+    )
+
+    from app.rag.custom_embeddings import (
+        GenAIEmbeddings
+    )
+except Exception:
+    Chroma = None
+    GenAIEmbeddings = None
 
 
 CHROMA_PATH = (
@@ -12,24 +18,53 @@ CHROMA_PATH = (
 )
 
 
-embeddings = GenAIEmbeddings()
+def _load_vector_db():
+    if os.getenv("ENABLE_POLICY_RAG", "false").lower() != "true":
+        return None
+
+    if not Chroma or not GenAIEmbeddings:
+        return None
+
+    try:
+        return Chroma(
+            persist_directory=CHROMA_PATH,
+            embedding_function=GenAIEmbeddings()
+        )
+    except BaseException as exc:
+        print("\nPOLICY RETRIEVER LOAD ERROR:\n")
+        print(exc)
+        return None
 
 
-vectordb = Chroma(
-
-    persist_directory=CHROMA_PATH,
-
-    embedding_function=embeddings
-)
+vectordb = None
 
 
 def retrieve_policy(query):
+    global vectordb
 
-    docs = vectordb.similarity_search(
+    if vectordb is None:
+        vectordb = _load_vector_db()
 
-        query,
+    if not vectordb:
+        return (
+            "Policy retriever unavailable. Use conservative defaults: "
+            "economy flights, business hotels, manager approval for violations."
+        )
 
-        k=3
-    )
-
-    return docs
+    try:
+        docs = vectordb.similarity_search(
+            query,
+            k=3
+        )
+        return "\n\n".join(
+            getattr(doc, "page_content", str(doc))
+            for doc in docs
+        )
+    except BaseException as exc:
+        print("\nPOLICY RETRIEVER ERROR:\n")
+        print(exc)
+        vectordb = None
+        return (
+            "Policy retrieval failed. Use conservative defaults: "
+            "economy flights, business hotels, manager approval for violations."
+        )

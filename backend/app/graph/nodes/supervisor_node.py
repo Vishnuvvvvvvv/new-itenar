@@ -1,4 +1,7 @@
 from app.graph.state import TravelState
+from app.graph.agent_runtime import (
+    run_agent_step
+)
 
 from app.agents.supervisor_agent import (
     supervisor_agent
@@ -6,6 +9,11 @@ from app.agents.supervisor_agent import (
 
 
 def supervisor_node(state: TravelState):
+    run_agent_step(
+        state,
+        "Supervisor Agent",
+        "Classifying request and selecting downstream travel agents."
+    )
 
     parsed_request = state["parsed_request"]
 
@@ -24,8 +32,10 @@ def supervisor_node(state: TravelState):
         "next_steps"
     ]
 
-    state["execution_logs"].append(
-        "LLM Supervisor Agent executed successfully."
+    run_agent_step(
+        state,
+        "Supervisor Agent",
+        f"Workflow selected: {', '.join(result.get('next_steps', []))}."
     )
 
     return state

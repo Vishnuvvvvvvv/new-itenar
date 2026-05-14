@@ -1,6 +1,9 @@
 from app.graph.state import (
     TravelState
 )
+from app.graph.agent_runtime import (
+    run_agent_step
+)
 
 from app.agents.policy_agent import (
     policy_agent
@@ -10,15 +13,25 @@ from app.agents.policy_agent import (
 def policy_node(
     state: TravelState
 ):
-
-    flights = state.get(
-        "flight_options",
-        []
+    run_agent_step(
+        state,
+        "Policy RAG Agent",
+        "Validating selected itinerary against enterprise travel policy rules."
     )
 
-    hotels = state.get(
-        "hotel_options",
-        []
+    optimized = state.get(
+        "optimized_itinerary",
+        {}
+    )
+
+    flights = optimized.get(
+        "selected_flights",
+        state.get("flight_options", [])
+    )
+
+    hotels = optimized.get(
+        "selected_hotels",
+        state.get("hotel_options", [])
     )
 
     employee_context = state.get(
@@ -31,27 +44,31 @@ def policy_node(
     # =========================
 
     total_cost = (
-
         sum(
-
             flight.get(
                 "price",
                 0
             )
-
             for flight in flights
         )
-
         +
-
         sum(
-
             hotel.get(
                 "price_per_night",
                 0
             )
-
             for hotel in hotels
+        )
+        +
+        sum(
+            transport.get(
+                "estimated_cost",
+                0
+            )
+            for transport in state.get(
+                "transport_options",
+                []
+            )
         )
     )
 
@@ -71,10 +88,10 @@ def policy_node(
         results
     )
 
-    state[
-        "execution_logs"
-    ].append(
-        "Policy RAG agent executed successfully."
+    run_agent_step(
+        state,
+        "Policy RAG Agent",
+        "Policy compliance and violations evaluated."
     )
 
     return state

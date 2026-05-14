@@ -1,136 +1,88 @@
-import json
-
-from app.core.llm import (
-    llm
-)
-
 from app.rag.retriever import (
     retrieve_policy
 )
 
-from app.utils.json_parser import (
-    extract_json
-)
+
+HOTEL_NIGHTLY_LIMIT = 8000
+TRIP_COST_LIMIT = 25000
 
 
 def policy_agent(
-
     flights,
     hotels,
     employee_context,
     total_cost
 ):
-
     department = employee_context.get(
         "department",
         ""
     )
-
     designation = employee_context.get(
         "designation",
         ""
     )
 
-    query = f"""
-Department: {department}
-Designation: {designation}
-Travel Policy
-"""
-
     policy_context = retrieve_policy(
-        query
+        f"Department: {department}\nDesignation: {designation}\nTravel Policy"
     )
 
-    prompt = f"""
-You are an enterprise travel policy validation agent.
+    violations = []
+    recommendations = []
 
-STRICTLY validate itinerary ONLY using retrieved policy documents.
+    for flight in flights or []:
+        if flight.get("travel_class", "").lower() != "economy":
+            violations.append(
+                {
+                    "type": "flight_class",
+                    "description": (
+                        f"{flight.get('flight_id')} uses "
+                        f"{flight.get('travel_class')} class."
+                    ),
+                }
+            )
+            recommendations.append(
+                "Prefer economy class unless manager approval is available."
+            )
 
-DO NOT invent policies.
-DO NOT hallucinate rules.
-DO NOT assume restrictions.
+    for hotel in hotels or []:
+        if hotel.get("hotel_type", "").lower() == "luxury":
+            violations.append(
+                {
+                    "type": "hotel_type",
+                    "description": (
+                        f"{hotel.get('hotel_name')} is categorized as luxury."
+                    ),
+                }
+            )
+        if hotel.get("price_per_night", 0) > HOTEL_NIGHTLY_LIMIT:
+            violations.append(
+                {
+                    "type": "hotel_budget",
+                    "description": (
+                        f"{hotel.get('hotel_name')} exceeds INR "
+                        f"{HOTEL_NIGHTLY_LIMIT} per night."
+                    ),
+                }
+            )
 
-=========================
-POLICY DOCUMENTS
-=========================
-
-{policy_context}
-
-=========================
-FLIGHTS
-=========================
-
-{json.dumps(flights, indent=2)}
-
-=========================
-HOTELS
-=========================
-
-{json.dumps(hotels, indent=2)}
-
-=========================
-TOTAL COST
-=========================
-
-{total_cost}
-
-=========================
-
-Validate:
-- flight compliance
-- hotel compliance
-- approval requirements
-- airline restrictions
-- budget rules
-
-Return STRICT JSON ONLY.
-
-DO NOT explain.
-DO NOT generate markdown.
-DO NOT generate code.
-
-OUTPUT FORMAT:
-
-{{
-  "compliant": true,
-  "violations": [],
-  "recommendations": []
-}}
-"""
-
-    try:
-
-        response = llm.invoke(
-            prompt
+    if total_cost > TRIP_COST_LIMIT:
+        violations.append(
+            {
+                "type": "trip_budget",
+                "description": (
+                    f"Trip total INR {total_cost} exceeds INR {TRIP_COST_LIMIT}."
+                ),
+            }
         )
 
-        content = response.content.strip()
-
-        print(
-            "\nPOLICY AGENT RAW OUTPUT:\n"
+    if violations:
+        recommendations.append(
+            "Submit this itinerary for manager approval before booking."
         )
 
-        print(content)
-
-        result = extract_json(
-            content
-        )
-
-        return result
-
-    except Exception as e:
-
-        print(
-            "\nPOLICY AGENT ERROR:\n"
-        )
-
-        print(str(e))
-
-        return {
-
-            "compliant": True,
-
-            "violations": [],
-
-            "recommendations": []
-        }
+    return {
+        "compliant": not violations,
+        "violations": violations,
+        "recommendations": list(dict.fromkeys(recommendations)),
+        "policy_context_used": bool(policy_context),
+    }
